@@ -1,19 +1,21 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from backend.src.config.database import get_db
 from backend.src.models.vault_item import VaultItem, CustomField
-from backend.src.schemas.vault_item import VaultItemCreate
+from backend.src.schemas.vault_item import VaultItemCreate, VaultItemResponse
+from typing import List
 
 router = APIRouter(prefix="/vaultitems", tags=["Vault Items"])
 
-@router.get("/")
+@router.get("/", response_model=List[VaultItemResponse])
 def get_vault_items(db: Session = Depends(get_db)):
     """
     Geeft alle vaultitems van gebruiker terug.
     Authenticated: Yes
     """
     user_id = 1
-    items = db.query(VaultItem).filter(VaultItem.user_id == user_id).all()
+    # Use joinedload to eagerly load the custom_fields relationship
+    items = db.query(VaultItem).options(joinedload(VaultItem.custom_fields)).filter(VaultItem.user_id == user_id).all()
     return items
 
 @router.post("/create")
