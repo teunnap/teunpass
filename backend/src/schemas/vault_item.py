@@ -1,3 +1,4 @@
+import uuid
 from pydantic import BaseModel
 from typing import Optional, List
 
@@ -13,13 +14,13 @@ class VaultItemCreate(BaseModel):
     custom_fields: Optional[List[CustomFieldCreate]] = []
 
 class CustomFieldResponse(CustomFieldCreate):
-    customfield_id: int
+    customfield_id: uuid.UUID
 
     class Config:
         from_attributes = True
 
 class VaultItemResponse(VaultItemCreate):
-    vaultitem_id: int
+    vaultitem_id: uuid.UUID
     custom_fields: List[CustomFieldResponse] = []
 
     class Config:
