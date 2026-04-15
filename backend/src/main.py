@@ -17,7 +17,8 @@ async def lifespan(app: FastAPI):
         if not test_user:
             new_user = user.User(
                 email="test@example.com",
-                verification_hash="0" * 64,
+                master_password_hash="0" * 64,
+                auth_salt="1" * 64,
                 role=user.UserRole.premium
             )
             db.add(new_user)

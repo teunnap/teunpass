@@ -13,7 +13,8 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     email = Column(String, unique=True, index=True)
-    verification_hash = Column(String(length=64))
+    master_password_hash = Column(String(length=64))
+    auth_salt = Column(String(length=64))
     role = Column(Enum(UserRole), default=UserRole.default, nullable=False)
     zero_knowledge_accepted = Column(Boolean, default=False)
     is_verified = Column(Boolean, default=False)
