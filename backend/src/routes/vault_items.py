@@ -18,7 +18,7 @@ def get_vault_items(db: Session = Depends(get_db)):
     items = db.query(VaultItem).options(joinedload(VaultItem.custom_fields)).filter(VaultItem.user_id == user_id).all()
     return items
 
-@router.post("/create")
+@router.post("/create", response_model=VaultItemResponse)
 def create_vault_item(new_item_data: VaultItemCreate, db: Session = Depends(get_db)):
     """
     Maakt een nieuw vaultitem aan gelinkt aan gebruiker.
