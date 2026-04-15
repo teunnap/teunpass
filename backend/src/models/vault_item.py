@@ -9,7 +9,7 @@ class VaultItem(Base):
     vaultitem_id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     
-    e_title = Column(String)
+    e_title = Column(String, nullable=False)
     e_url = Column(String)
     e_username = Column(String)
     e_password = Column(String)
