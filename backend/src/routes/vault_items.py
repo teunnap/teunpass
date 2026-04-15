@@ -47,8 +47,7 @@ def create_vault_item(new_item_data: VaultItemCreate, db: Session = Depends(get_
     
     return db_item
 
-
-@router.put("/{id}")
+@router.patch("/{id}")
 def update_vault_item(id: uuid.UUID, new_item_data: VaultItemCreate, db: Session = Depends(get_db)):
     """
     Update een vaultitem.
@@ -59,7 +58,7 @@ def update_vault_item(id: uuid.UUID, new_item_data: VaultItemCreate, db: Session
     item = db.query(VaultItem).filter(VaultItem.vaultitem_id == id, VaultItem.user_id == user_id).first()
     if not item:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, # voor Maarten
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Vault item not found"
         )
     
@@ -87,7 +86,7 @@ def delete_vault_item(id: uuid.UUID, db: Session = Depends(get_db)):
     item = db.query(VaultItem).filter(VaultItem.vaultitem_id == id, VaultItem.user_id == user_id).first()
     if not item:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_400_BAD_REQUEST, # voor Maarten
             detail="Vault item not found"
         )
     
