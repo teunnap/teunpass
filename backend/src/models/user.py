@@ -1,6 +1,7 @@
 import enum
 from sqlalchemy import Boolean, Column, Integer, String, DateTime, Enum
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from backend.src.config.database import Base
 
 class UserRole(str, enum.Enum):
@@ -20,3 +21,5 @@ class User(Base):
     is_verified = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     modified_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    vault_items = relationship("VaultItem", back_populates="owner", cascade="all, delete-orphan")

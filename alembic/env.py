@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 load_dotenv() 
 
 from backend.src.config.database import Base
-from backend.src.models import user
+from backend.src.models import user, vault_item
 
 config = context.config
 config.set_main_option("sqlalchemy.url", os.environ.get("DATABASE_URL", ""))
