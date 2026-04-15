@@ -49,13 +49,33 @@ def create_vault_item(new_item_data: VaultItemCreate, db: Session = Depends(get_
 
 
 @router.put("/{id}")
-def update_vault_item(id: uuid.UUID, db: Session = Depends(get_db)):
+def update_vault_item(id: uuid.UUID, new_item_data: VaultItemCreate, db: Session = Depends(get_db)):
     """
     Update een vaultitem.
     Authenticated: Yes
     Body: Title, url, username, password, customfields (allemaal hashed, optioneel)
     """
-    pass
+    user_id = uuid.UUID(int=1)
+    item = db.query(VaultItem).filter(VaultItem.vaultitem_id == id, VaultItem.user_id == user_id).first()
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, # voor Maarten
+            detail="Vault item not found"
+        )
+    
+    item.e_title = new_item_data.e_title
+    item.e_url = new_item_data.e_url
+    item.e_username = new_item_data.e_username
+    item.e_password = new_item_data.e_password
+    item.custom_fields = [
+        CustomField(e_key=cf.e_key, e_value=cf.e_value) 
+        for cf in new_item_data.custom_fields
+    ] if new_item_data.custom_fields else []
+    
+    db.commit()
+    db.refresh(item)
+    
+    return item
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_vault_item(id: uuid.UUID, db: Session = Depends(get_db)):
