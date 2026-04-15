@@ -15,8 +15,10 @@ async def lifespan(app: FastAPI):
     db = SessionLocal()
     try:
         test_user = db.query(user.User).filter(user.User.email == "test@example.com").first()
+        import uuid
         if not test_user:
             new_user = user.User(
+                id=uuid.UUID(int=1),
                 email="test@example.com",
                 master_password_hash="0" * 64,
                 auth_salt="1" * 64,

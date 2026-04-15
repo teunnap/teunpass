@@ -13,8 +13,8 @@ def get_vault_items(db: Session = Depends(get_db)):
     Geeft alle vaultitems van gebruiker terug.
     Authenticated: Yes
     """
-    user_id = 1
-    # Use joinedload to eagerly load the custom_fields relationship
+    import uuid
+    user_id = uuid.UUID(int=1)
     items = db.query(VaultItem).options(joinedload(VaultItem.custom_fields)).filter(VaultItem.user_id == user_id).all()
     return items
 
@@ -25,7 +25,8 @@ def create_vault_item(new_item_data: VaultItemCreate, db: Session = Depends(get_
     Authenticated: Yes
     Body: Title, url, username, password, customfields (allemaal hashed)
     """
-    user_id = 1
+    import uuid
+    user_id = uuid.UUID(int=1)
     
     custom_fields_db = [
         CustomField(e_key=cf.e_key, e_value=cf.e_value) 
