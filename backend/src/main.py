@@ -1,16 +1,17 @@
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from backend.src.routes import users
-from backend.src.config.database import SessionLocal
-from backend.src.models import user
+from backend.src.routes import vault_items
 
+# Setup standard logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup seed test user
+    from backend.src.config.database import SessionLocal
+    from backend.src.models import user
     db = SessionLocal()
     try:
         test_user = db.query(user.User).filter(user.User.email == "test@example.com").first()
@@ -31,7 +32,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Teunpass API", description="FastAPI + SQLAlchemy", lifespan=lifespan)
 
-app.include_router(users.router)
+app.include_router(vault_items.router)
 
 @app.get("/")
 def read_root():
