@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from backend.src.config.database import get_db
 from backend.src.models.vault_item import VaultItem, CustomField
 from backend.src.schemas.vault_item import VaultItemCreate, VaultItemResponse
 from typing import List
+import uuid
 
 router = APIRouter(prefix="/vaultitems", tags=["Vault Items"])
 
@@ -13,19 +14,17 @@ def get_vault_items(db: Session = Depends(get_db)):
     Geeft alle vaultitems van gebruiker terug.
     Authenticated: Yes
     """
-    import uuid
     user_id = uuid.UUID(int=1)
     items = db.query(VaultItem).options(joinedload(VaultItem.custom_fields)).filter(VaultItem.user_id == user_id).all()
     return items
 
-@router.post("/create", response_model=VaultItemResponse)
+@router.post("/create", response_model=VaultItemResponse, status_code=status.HTTP_201_CREATED)
 def create_vault_item(new_item_data: VaultItemCreate, db: Session = Depends(get_db)):
     """
     Maakt een nieuw vaultitem aan gelinkt aan gebruiker.
     Authenticated: Yes
     Body: Title, url, username, password, customfields (allemaal hashed)
     """
-    import uuid
     user_id = uuid.UUID(int=1)
     
     custom_fields_db = [
@@ -50,7 +49,7 @@ def create_vault_item(new_item_data: VaultItemCreate, db: Session = Depends(get_
 
 
 @router.put("/{id}")
-def update_vault_item(id: int, db: Session = Depends(get_db)):
+def update_vault_item(id: uuid.UUID, db: Session = Depends(get_db)):
     """
     Update een vaultitem.
     Authenticated: Yes
@@ -58,10 +57,20 @@ def update_vault_item(id: int, db: Session = Depends(get_db)):
     """
     pass
 
-@router.delete("/{id}")
-def delete_vault_item(id: int, db: Session = Depends(get_db)):
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_vault_item(id: uuid.UUID, db: Session = Depends(get_db)):
     """
     Verwijdert een vaultitem.
     Authenticated: Yes
     """
-    pass
+    user_id = uuid.UUID(int=1)
+    item = db.query(VaultItem).filter(VaultItem.vaultitem_id == id, VaultItem.user_id == user_id).first()
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Vault item not found"
+        )
+    
+    db.delete(item)
+    db.commit()
+    return None
