@@ -202,7 +202,7 @@ function App() {
                 </div>
               )}
               {filteredItems.map((item) => (
-                <div key={item.vaultitem_id} className="h-[240px] bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col relative group hover:shadow-md transition-shadow">
+                <div key={item.vaultitem_id} className="h-[240px] bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col relative group hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300">
                   
                   <div className="flex justify-between items-start mb-4">
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${getCardColor(item.e_title)}`}>
