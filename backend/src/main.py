@@ -1,6 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from backend.src.routes import vault_items
 
 # Setup standard logger
@@ -33,6 +34,15 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="Teunpass API", description="FastAPI + SQLAlchemy", lifespan=lifespan)
+
+# Allow React app connecting on port 5173
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(vault_items.router)
 
