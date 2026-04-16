@@ -1,5 +1,5 @@
 import uuid
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List
 
 class CustomFieldCreate(BaseModel):
@@ -19,5 +19,5 @@ class CustomFieldResponse(CustomFieldCreate):
 
 class VaultItemResponse(VaultItemCreate):
     vaultitem_id: uuid.UUID
-    custom_fields: List[CustomFieldResponse] = []
+    custom_fields: List[CustomFieldResponse] = Field(default_factory=list)
     model_config = ConfigDict(from_attributes=True)
