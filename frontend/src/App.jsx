@@ -61,6 +61,21 @@ function App() {
     }
   };
 
+  const handleCopyPassword = async (password) => {
+    try {
+      if (password) {
+        await navigator.clipboard.writeText(password);
+        setNotification('Password copied to clipboard!');
+        setTimeout(() => setNotification(null), 3000);
+      } else {
+        setNotification('No password to copy!');
+        setTimeout(() => setNotification(null), 3000);
+      }
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
   const getInitials = (title) => {
     return title ? title.substring(0, 2).toUpperCase() : '??';
   };
@@ -186,7 +201,10 @@ function App() {
                   <div className="flex-1"></div>
 
                   <div className="flex justify-between items-center mt-4">
-                    <button className="bg-blue-50 text-[#0A4AEF] px-4 py-1.5 rounded-md text-xs font-bold tracking-wide flex items-center gap-1.5 hover:bg-blue-100 transition-colors cursor-pointer">
+                    <button 
+                      onClick={() => handleCopyPassword(item.e_password)}
+                      className="bg-blue-50 text-[#0A4AEF] px-4 py-1.5 rounded-md text-xs font-bold tracking-wide flex items-center gap-1.5 hover:bg-blue-100 transition-colors cursor-pointer"
+                    >
                       <Copy className="w-3.5 h-3.5" />
                       Copy
                     </button>
