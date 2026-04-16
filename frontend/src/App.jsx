@@ -17,7 +17,22 @@ function App() {
   const [error, setError] = useState(null);
 
   const fetchVaultItems = async () => {
-    return [];
+    setLoading(true);
+    setError(null);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/vaultitems/`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch from API');
+      }
+      const data = await response.json();
+      setVaultItems(data);
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
