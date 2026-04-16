@@ -16,6 +16,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchVaultItems = async () => {
     setLoading(true);
@@ -96,6 +97,14 @@ function App() {
     return colors[Math.abs(hash) % colors.length];
   };
 
+  const filteredItems = vaultItems ? vaultItems.filter(item => {
+    if (!searchQuery) return true;
+    const term = searchQuery.toLowerCase();
+    const titleMatch = item.e_title?.toLowerCase().includes(term);
+    const userMatch = item.e_username?.toLowerCase().includes(term);
+    return titleMatch || userMatch;
+  }) : null;
+
   return (
     <div className="flex min-h-screen bg-[#F4F7FB] font-sans text-slate-800">
       
@@ -149,6 +158,8 @@ function App() {
               <Search className="w-5 h-5 text-slate-400 absolute left-4" />
               <input 
                 type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search your logins..." 
                 className="w-full bg-white rounded-full border border-slate-200 py-3.5 pl-12 pr-12 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0A4AEF]/20 focus:border-[#0A4AEF] transition-all"
               />
@@ -184,7 +195,12 @@ function App() {
               </div>
 
               {/* MAPPED ITEMS */}
-              {vaultItems.map((item) => (
+              {filteredItems.length === 0 && searchQuery !== '' && (
+                <div className="col-span-full py-10 mt-2 text-center text-slate-500 bg-white rounded-2xl shadow-sm border border-slate-100">
+                  No items match your search.
+                </div>
+              )}
+              {filteredItems.map((item) => (
                 <div key={item.vaultitem_id} className="h-[240px] bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col relative group hover:shadow-md transition-shadow">
                   
                   <div className="flex justify-between items-start mb-4">
