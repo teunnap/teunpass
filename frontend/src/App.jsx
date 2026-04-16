@@ -8,7 +8,8 @@ import {
   Plus, 
   Copy, 
   Trash2, 
-  Star 
+  Star,
+  Pencil
 } from 'lucide-react';
 
 function App() {
@@ -224,12 +225,21 @@ function App() {
                       <Copy className="w-3.5 h-3.5" />
                       Copy
                     </button>
-                    <button 
-                      onClick={() => handleDelete(item.vaultitem_id)}
-                      className="text-slate-300 hover:text-red-500 transition-colors cursor-pointer p-2 -mr-2"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1 -mr-2">
+                      <button 
+                        className="text-slate-300 hover:text-[#0A4AEF] transition-colors cursor-pointer p-2"
+                        title="Edit Item"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(item.vaultitem_id)}
+                        className="text-slate-300 hover:text-red-500 transition-colors cursor-pointer p-2"
+                        title="Delete Item"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                   
                 </div>
