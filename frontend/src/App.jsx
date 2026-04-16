@@ -15,6 +15,7 @@ function App() {
   const [vaultItems, setVaultItems] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [notification, setNotification] = useState(null);
 
   const fetchVaultItems = async () => {
     setLoading(true);
@@ -39,6 +40,27 @@ function App() {
     fetchVaultItems();
   }, []);
 
+  const handleDelete = async (itemId) => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/vaultitems/${itemId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete item');
+      }
+
+      setVaultItems((prev) => prev.filter(item => item.vaultitem_id !== itemId));
+      
+      setNotification('Item has been deleted');
+      setTimeout(() => setNotification(null), 3000);
+    } catch (err) {
+      setError(err.message);
+      console.error(err);
+    }
+  };
+
   const getInitials = (title) => {
     return title ? title.substring(0, 2).toUpperCase() : '??';
   };
@@ -62,6 +84,12 @@ function App() {
   return (
     <div className="flex min-h-screen bg-[#F4F7FB] font-sans text-slate-800">
       
+      {notification && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-green-100 text-green-800 border border-green-200 px-6 py-3 rounded-full shadow-lg z-50 transition-all font-medium text-sm">
+          {notification}
+        </div>
+      )}
+
       {/* LEFT SIDEBAR */}
       <aside className="w-[260px] bg-white border-r border-slate-200 flex flex-col pt-6">
         <div className="px-6 mb-8">
@@ -163,7 +191,10 @@ function App() {
                       <Copy className="w-3.5 h-3.5" />
                       Copy
                     </button>
-                    <button className="text-slate-300 hover:text-red-500 transition-colors cursor-pointer p-2 -mr-2">
+                    <button 
+                      onClick={() => handleDelete(item.vaultitem_id)}
+                      className="text-slate-300 hover:text-red-500 transition-colors cursor-pointer p-2 -mr-2"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
