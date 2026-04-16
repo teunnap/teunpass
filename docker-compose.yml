@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-teunpass_usr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-teunpass_secure_pwd}
+      POSTGRES_DB: ${POSTGRES_DB:-teunpass_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-teunpass_usr}:${POSTGRES_PASSWORD:-teunpass_secure_pwd}@db:5432/${POSTGRES_DB:-teunpass_db}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # REPLACE THIS with your actual VPS public IP or Domain during deployment
+        - VITE_API_URL=http://YOUR_VPS_IP:8000
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
