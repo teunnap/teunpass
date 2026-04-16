@@ -67,11 +67,13 @@ def test_update_vault_item(client):
     assert data["e_title"] == "Updated Secret"
     assert data["e_url"] == "https://updated.com"
 
-    response_get = client.get(f"/vaultitems/{created_item_id}")
+    response_get = client.get(f"/vaultitems/")
     assert response_get.status_code == 200
     data_get = response_get.json()
-    assert data_get["e_title"] == "Updated Secret"
-    assert data_get["e_url"] == "https://updated.com"
+    vaultitem = [item for item in data_get if item["vaultitem_id"] == created_item_id][0]
+    assert vaultitem is not None
+    assert vaultitem["e_title"] == "Updated Secret"
+    assert vaultitem["e_url"] == "https://updated.com"
 
 def test_update_vault_item_nonexistent(client):
     random_uuid = str(uuid.uuid4())
