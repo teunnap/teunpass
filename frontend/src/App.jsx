@@ -11,12 +11,14 @@ import {
   Star,
   Pencil
 } from 'lucide-react';
+import Notification from './components/Notification';
+import { useNotification } from './hooks/useNotification';
 
 function App() {
   const [vaultItems, setVaultItems] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [notification, setNotification] = useState(null);
+  const { notification, showNotification } = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
 
   const fetchVaultItems = async () => {
@@ -55,10 +57,10 @@ function App() {
 
       setVaultItems((prev) => prev.filter(item => item.vaultitem_id !== itemId));
       
-      setNotification('Item has been deleted');
-      setTimeout(() => setNotification(null), 3000);
+      showNotification('Item has been deleted', 'success');
     } catch (err) {
       setError(err.message);
+      showNotification(err.message, 'error');
       console.error(err);
     }
   };
@@ -67,13 +69,12 @@ function App() {
     try {
       if (password) {
         await navigator.clipboard.writeText(password);
-        setNotification('Password copied to clipboard!');
-        setTimeout(() => setNotification(null), 3000);
+        showNotification('Password copied to clipboard!', 'success');
       } else {
-        setNotification('No password to copy!');
-        setTimeout(() => setNotification(null), 3000);
+        showNotification('No password to copy!', 'warning');
       }
     } catch (err) {
+      showNotification('Failed to copy text', 'error');
       console.error('Failed to copy text: ', err);
     }
   };
@@ -109,11 +110,7 @@ function App() {
   return (
     <div className="flex min-h-screen bg-[#F4F7FB] font-sans text-slate-800">
       
-      {notification && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-green-100 text-green-800 border border-green-200 px-6 py-3 rounded-full shadow-lg z-50 transition-all font-medium text-sm">
-          {notification}
-        </div>
-      )}
+      <Notification notification={notification} />
 
       {/* LEFT SIDEBAR */}
       <aside className="w-[260px] bg-white border-r border-slate-200 flex flex-col pt-6">
