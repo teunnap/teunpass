@@ -235,6 +235,7 @@ function App() {
                         onClick={() => handleDelete(item.vaultitem_id)}
                         className="text-slate-300 hover:text-red-500 transition-colors cursor-pointer p-2"
                         title="Delete Item"
+                        aria-label="Delete Item"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
