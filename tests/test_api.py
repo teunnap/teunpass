@@ -2,6 +2,14 @@ import pytest
 from fastapi.testclient import TestClient
 from backend.src.main import app
 import uuid
+from backend.src.config.database import Base, engine
+import os
+
+@pytest.fixture(scope="session", autouse=True)
+def create_test_schema():
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
 @pytest.fixture(scope="module")
 def client():
