@@ -2,6 +2,14 @@ import pytest
 from fastapi.testclient import TestClient
 from backend.src.main import app
 import uuid
+from backend.src.config.database import Base, engine
+import os
+
+@pytest.fixture(scope="session", autouse=True)
+def create_test_schema():
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
 @pytest.fixture(scope="module")
 def client():
@@ -67,11 +75,13 @@ def test_update_vault_item(client):
     assert data["e_title"] == "Updated Secret"
     assert data["e_url"] == "https://updated.com"
 
-    response_get = client.get(f"/vaultitems/{created_item_id}")
+    response_get = client.get(f"/vaultitems/")
     assert response_get.status_code == 200
     data_get = response_get.json()
-    assert data_get["e_title"] == "Updated Secret"
-    assert data_get["e_url"] == "https://updated.com"
+    vaultitem = next((item for item in data_get if item["vaultitem_id"] == created_item_id), None)
+    assert vaultitem is not None, f"Updated vault item with id {created_item_id} was not found in /vaultitems/ response"
+    assert vaultitem["e_title"] == "Updated Secret"
+    assert vaultitem["e_url"] == "https://updated.com"
 
 def test_update_vault_item_nonexistent(client):
     random_uuid = str(uuid.uuid4())

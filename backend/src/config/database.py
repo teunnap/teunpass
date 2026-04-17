@@ -5,15 +5,10 @@ import os
 
 load_dotenv()
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.environ["DATABASE_URL"]
 
-if not SQLALCHEMY_DATABASE_URL:
-    raise ValueError(
-        "DATABASE_URL environment variable is not set. "
-        "Set DATABASE_URL before initializing the database engine."
-    )
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL
+    DATABASE_URL, pool_pre_ping=True
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
