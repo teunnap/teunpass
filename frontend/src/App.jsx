@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import Notification from './components/Notification';
 import { useNotification } from './hooks/useNotification';
+import AddVaultItemModal from './components/AddVaultItemModal';
 
 function App() {
   const [vaultItems, setVaultItems] = useState(null);
@@ -19,6 +20,13 @@ function App() {
   const [error, setError] = useState(null);
   const { notification, showNotification } = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showModal, setShowModal] = useState(false);
+
+  const handleItemSaved = (newItem) => {
+    setVaultItems(prev => [...(prev || []), newItem]);
+    setShowModal(false);
+    showNotification('Item added to vault!', 'success');
+  };
 
   const fetchVaultItems = async () => {
     setLoading(true);
@@ -169,7 +177,9 @@ function App() {
               <h2 className="text-3xl font-bold mb-1">Vault Overview</h2>
               <p className="text-slate-500 text-sm">Manage your secure assets and digital identity.</p>
             </div>
-            <button className="bg-[#0A4AEF] hover:bg-blue-700 text-white px-5 py-2.5 rounded-full font-medium flex items-center gap-2 shadow-sm transition-colors text-sm cursor-pointer">
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-[#0A4AEF] hover:bg-blue-700 text-white px-5 py-2.5 rounded-full font-medium flex items-center gap-2 shadow-sm transition-colors text-sm cursor-pointer">
               <Plus className="w-4 h-4" />
               Add New Item
             </button>
@@ -184,7 +194,9 @@ function App() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               
               {/* ADD NEW CARD placeholder */}
-              <div className="h-[240px] border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-slate-500 hover:bg-slate-100/50 cursor-pointer transition-colors">
+              <div
+                onClick={() => setShowModal(true)}
+                className="h-[240px] border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-slate-500 hover:bg-slate-100/50 cursor-pointer transition-colors">
                 <div className="w-12 h-12 bg-[#F4F7FB] rounded-full flex items-center justify-center mb-3">
                   <Plus className="w-5 h-5 text-slate-500" />
                 </div>
@@ -245,6 +257,12 @@ function App() {
           )}
         </div>
       </main>
+      {showModal && (
+        <AddVaultItemModal
+          onClose={() => setShowModal(false)}
+          onSaved={handleItemSaved}
+        />
+      )}
     </div>
   );
 }
