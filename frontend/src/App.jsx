@@ -8,7 +8,6 @@ import {
   Plus, 
   Copy, 
   Trash2, 
-  Star,
   Pencil
 } from 'lucide-react';
 
