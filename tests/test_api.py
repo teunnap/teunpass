@@ -70,8 +70,8 @@ def test_update_vault_item(client):
     response_get = client.get(f"/vaultitems/")
     assert response_get.status_code == 200
     data_get = response_get.json()
-    vaultitem = [item for item in data_get if item["vaultitem_id"] == created_item_id][0]
-    assert vaultitem is not None
+    vaultitem = next((item for item in data_get if item["vaultitem_id"] == created_item_id), None)
+    assert vaultitem is not None, f"Updated vault item with id {created_item_id} was not found in /vaultitems/ response"
     assert vaultitem["e_title"] == "Updated Secret"
     assert vaultitem["e_url"] == "https://updated.com"
 
