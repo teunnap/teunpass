@@ -5,7 +5,7 @@ from backend.src.models.vault_item import VaultItem, CustomField
 from backend.src.schemas.vault_item import VaultItemCreate, VaultItemResponse
 from typing import List
 import uuid
-import regex
+import re
 
 router = APIRouter(prefix="/vaultitems", tags=["Vault Items"])
 
@@ -34,7 +34,7 @@ def create_vault_item(new_item_data: VaultItemCreate, db: Session = Depends(get_
     ] if new_item_data.custom_fields else []
 
     if new_item_data.e_url:
-        if not regex.match(r"^[\w-]+(\.[\w-]+)+", new_item_data.e_url):
+        if not re.match(r"^https?://[\w-]+(\.[\w-]+)+([/?#][^\s]*)?$", new_item_data.e_url):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid URL format"
