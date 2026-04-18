@@ -5,12 +5,19 @@ const EMPTY_FORM    = { e_title: '', e_url: '', e_username: '', e_password: '' }
 const EMPTY_TOUCHED = { e_title: false, e_url: false, e_password: false };
 
 // --- Validation rules ---
-const URL_REGEX = /^[\w-]+(\.[\w-]+)+/;
+const isValidUrl = (value) => {
+  try {
+    const parsedUrl = new URL(value.trim());
+    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
 
 const validate = (form) => ({
-  e_title:    !form.e_title.trim()                            ? 'Name is required.'          : null,
-  e_url:      form.e_url && !URL_REGEX.test(form.e_url)       ? 'Enter a valid URL (https://…)' : null,
-  e_password: !form.e_password                               ? 'Consider adding a password.' : null,  // warning, not blocking
+  e_title:    !form.e_title.trim()                     ? 'Name is required.' : null,
+  e_url:      form.e_url && !isValidUrl(form.e_url)   ? 'Enter a valid URL (for example, https://example.com).' : null,
+  e_password: !form.e_password                        ? 'Consider adding a password.' : null,  // warning, not blocking
 });
 
 // --- Helper to compute input border colour ---
