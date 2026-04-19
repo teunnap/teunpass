@@ -50,7 +50,7 @@ Doordat de middleware op elke respons werkt, hoeven individuele routes hier geen
 
 **Backend:**
 ```bash
-python -m pip install -r backend/requirements.txt
+python -m pip install -r requirements.txt
 python -m uvicorn backend.src.main:app --reload
 ```
 
