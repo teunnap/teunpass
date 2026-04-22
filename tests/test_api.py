@@ -98,7 +98,7 @@ def test_update_vault_item_nonexistent(client):
         ]
     })
     
-    assert response.status_code == 400
+    assert response.status_code == 404
     data = response.json()
     assert data["detail"] == "Vault item not found"
 
@@ -114,5 +114,5 @@ def test_delete_vault_item(client):
 def test_delete_nonexistent_vault_item(client):
     random_uuid = str(uuid.uuid4())
     response = client.delete(f"/vaultitems/{random_uuid}")
-    assert response.status_code == 400
+    assert response.status_code == 404
     assert response.json() == {"detail": "Vault item not found"}
