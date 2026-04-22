@@ -102,6 +102,23 @@ def test_update_vault_item_nonexistent(client):
     data = response.json()
     assert data["detail"] == "Vault item not found"
 
+def test_update_vault_item_invalid_url(client):
+    response = client.patch(f"/vaultitems/{created_item_id}", json={
+        "e_title": "Updated Secret",
+        "e_url": "invalid-url",
+        "e_username": "updateduser",
+        "e_password": "updatedpassword",
+        "custom_fields": [
+            {
+                "e_key": "recovery_code",
+                "e_value": "12345-67890"
+            }
+        ]
+    })
+
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Invalid URL format"}
+
 def test_delete_vault_item(client):
     response = client.delete(f"/vaultitems/{created_item_id}")
     assert response.status_code == 204

@@ -6,6 +6,16 @@ from sqlalchemy.orm import Session, joinedload
 from backend.src.models.vault_item import VaultItem, CustomField
 from backend.src.schemas.vault_item import VaultItemCreate
 
+URL_PATTERN = re.compile(r"^https?://[\w-]+(\.[\w-]+)+([/?#][^\s]*)?$")
+
+
+def _validate_url(url: str | None) -> None:
+    if url and not URL_PATTERN.fullmatch(url):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid URL format",
+        )
+
 
 def get_items_for_user(db: Session, user_id: uuid.UUID) -> list[VaultItem]:
     """
@@ -24,12 +34,7 @@ def create_item(db: Session, user_id: uuid.UUID, data: VaultItemCreate) -> Vault
     Maakt een nieuw vaultitem aan gelinkt aan de opgegeven gebruiker.
     Valideert het URL-formaat indien aanwezig.
     """
-    if data.e_url:
-        if not re.match(r"^https?://[\w-]+(\.[\w-]+)+([/?#][^\s]*)?$", data.e_url):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid URL format",
-            )
+    _validate_url(data.e_url)
 
     custom_fields = [
         CustomField(e_key=cf.e_key, e_value=cf.e_value)
@@ -67,6 +72,8 @@ def update_item(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Vault item not found",
         )
+
+    _validate_url(data.e_url)
 
     item.e_title = data.e_title
     item.e_url = data.e_url
