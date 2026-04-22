@@ -21,11 +21,28 @@ function App() {
   const { notification, showNotification } = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
 
-  const handleItemSaved = (newItem) => {
-    setVaultItems(prev => [...(prev || []), newItem]);
+  const openCreateModal = () => {
+    setEditingItem(null);
+    setShowModal(true);
+  };
+
+  const openEditModal = (item) => {
+    setEditingItem(item);
+    setShowModal(true);
+  };
+
+  const handleItemSaved = (savedItem) => {
+    if (editingItem) {
+      setVaultItems(prev => prev.map(item => item.vaultitem_id === savedItem.vaultitem_id ? savedItem : item));
+      showNotification('Item updated successfully!', 'success');
+    } else {
+      setVaultItems(prev => [...(prev || []), savedItem]);
+      showNotification('Item added to vault!', 'success');
+    }
     setShowModal(false);
-    showNotification('Item added to vault!', 'success');
+    setEditingItem(null);
   };
 
   const fetchVaultItems = async () => {
@@ -178,7 +195,7 @@ function App() {
               <p className="text-slate-500 text-sm">Manage your secure assets and digital identity.</p>
             </div>
             <button
-              onClick={() => setShowModal(true)}
+              onClick={openCreateModal}
               className="bg-[#0A4AEF] hover:bg-blue-700 text-white px-5 py-2.5 rounded-full font-medium flex items-center gap-2 shadow-sm transition-colors text-sm cursor-pointer">
               <Plus className="w-4 h-4" />
               Add New Item
@@ -195,7 +212,7 @@ function App() {
               
               {/* ADD NEW CARD placeholder */}
               <div
-                onClick={() => setShowModal(true)}
+                onClick={openCreateModal}
                 className="h-[240px] border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-slate-500 hover:bg-slate-100/50 cursor-pointer transition-colors">
                 <div className="w-12 h-12 bg-[#F4F7FB] rounded-full flex items-center justify-center mb-3">
                   <Plus className="w-5 h-5 text-slate-500" />
@@ -235,6 +252,7 @@ function App() {
                     </button>
                     <div className="flex items-center gap-1 -mr-2">
                       <button 
+                        onClick={() => openEditModal(item)}
                         className="text-slate-300 hover:text-[#0A4AEF] transition-colors cursor-pointer p-2"
                         title="Edit Item"
                       >
@@ -259,8 +277,12 @@ function App() {
       </main>
       {showModal && (
         <AddVaultItemModal
-          onClose={() => setShowModal(false)}
+          onClose={() => {
+            setShowModal(false);
+            setEditingItem(null);
+          }}
           onSaved={handleItemSaved}
+          initialData={editingItem}
         />
       )}
     </div>

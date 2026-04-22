@@ -33,12 +33,12 @@ def create_vault_item(data: VaultItemCreate, db: Session = Depends(get_db)):
     return vault_item_service.create_item(db, user_id=_PLACEHOLDER_USER_ID, data=data)
 
 
-@router.patch("/{id}", response_model=VaultItemResponse)
+@router.put("/{id}", response_model=VaultItemResponse)
 def update_vault_item(id: uuid.UUID, data: VaultItemCreate, db: Session = Depends(get_db)):
     """
     Update een vaultitem.
     Authenticated: Yes
-    Body: Title, url, username, password, customfields (allemaal encrypted, optioneel)
+    Body: Title, url, username, password, customfields (allemaal encrypted)
     """
     return vault_item_service.update_item(db, item_id=id, user_id=_PLACEHOLDER_USER_ID, data=data)
 
