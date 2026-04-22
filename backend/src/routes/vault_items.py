@@ -10,7 +10,7 @@ from backend.src.services import vault_item as vault_item_service
 
 router = APIRouter(prefix="/vaultitems", tags=["Vault Items"])
 
-# TODO: vervang met goede authentication
+# TODO: vervang met authentication
 _PLACEHOLDER_USER_ID = uuid.UUID(int=1)
 
 

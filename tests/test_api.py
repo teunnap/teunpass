@@ -57,7 +57,7 @@ def test_get_vault_items(client):
     assert created_item_id in retrieved_ids
 
 def test_update_vault_item(client):
-    response = client.patch(f"/vaultitems/{created_item_id}", json={
+    response = client.put(f"/vaultitems/{created_item_id}", json={
         "e_title": "Updated Secret",
         "e_url": "https://updated.com",
         "e_username": "updateduser",
@@ -85,7 +85,7 @@ def test_update_vault_item(client):
 
 def test_update_vault_item_nonexistent(client):
     random_uuid = str(uuid.uuid4())
-    response = client.patch(f"/vaultitems/{random_uuid}", json={
+    response = client.put(f"/vaultitems/{random_uuid}", json={
         "e_title": "Updated Secret",
         "e_url": "https://updated.com",
         "e_username": "updateduser",
@@ -103,7 +103,7 @@ def test_update_vault_item_nonexistent(client):
     assert data["detail"] == "Vault item not found"
 
 def test_update_vault_item_invalid_url(client):
-    response = client.patch(f"/vaultitems/{created_item_id}", json={
+    response = client.put(f"/vaultitems/{created_item_id}", json={
         "e_title": "Updated Secret",
         "e_url": "invalid-url",
         "e_username": "updateduser",
