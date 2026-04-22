@@ -2,36 +2,53 @@ import pytest
 from fastapi.testclient import TestClient
 from backend.src.main import app
 import uuid
-from backend.src.config.database import Base, get_db
+from backend.src.config.database import Base, engine, get_db, DATABASE_URL
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
-# In-memory SQLite for testing so we don't accidentally wipe Postgres
-SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
-
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-app.dependency_overrides[get_db] = override_get_db
+TEST_DATABASE_URL = DATABASE_URL + "_test"
 
 @pytest.fixture(scope="session", autouse=True)
-def create_test_schema():
-    Base.metadata.create_all(bind=engine)
+def setup_test_database():
+    temp_engine = create_engine(DATABASE_URL, isolation_level="AUTOCOMMIT")
+    with temp_engine.connect() as conn:
+        conn.execute(text("DROP DATABASE IF EXISTS teunpass_test"))
+        conn.execute(text("CREATE DATABASE teunpass_test"))
+    temp_engine.dispose()
+
+    test_engine = create_engine(TEST_DATABASE_URL)
+    Base.metadata.create_all(bind=test_engine)
+
+    from backend.src.models.user import User, UserRole
+    import uuid
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
+    db = TestingSessionLocal()
+    new_user = User(
+        id=uuid.UUID(int=1),
+        email="test@example.com",
+        master_password_hash="0" * 64,
+        auth_salt="1" * 64,
+        role=UserRole.premium
+    )
+    db.add(new_user)
+    db.commit()
+    db.close()
+
+    def override_get_db():
+        db = TestingSessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+    
+    app.dependency_overrides[get_db] = override_get_db
+
     yield
-    Base.metadata.drop_all(bind=engine)
+
+    # 4. Cleanup
+    Base.metadata.drop_all(bind=test_engine)
+    test_engine.dispose()
 
 @pytest.fixture(scope="module")
 def client():
