@@ -74,7 +74,7 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, custom_fields: initialData ? initialData.custom_fields : [] }),
+        body: JSON.stringify({ ...form, custom_fields: initialData?.custom_fields ?? [] }),
       });
       if (!response.ok) throw new Error('Failed to save item.');
       onSaved(await response.json());
