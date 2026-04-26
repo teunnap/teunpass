@@ -13,13 +13,13 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: teunpass_test
+          POSTGRES_DB: teunpass
           POSTGRES_USER: testuser
           POSTGRES_PASSWORD: testpassword
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U testuser -d teunpass_test"
+          --health-cmd "pg_isready -U testuser -d teunpass"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -39,12 +39,12 @@ jobs:
           
       - name: Run Alembic migrations
         env:
-          DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/teunpass_test
+          DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/teunpass
         run: |
           alembic upgrade head
           
       - name: Run tests with Pytest
         env:
-          DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/teunpass_test
+          DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/teunpass
         run: |
           pytest tests/
