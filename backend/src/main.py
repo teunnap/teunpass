@@ -5,12 +5,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.src.routes import vault_items
 from backend.src.middleware.security_headers import SecurityHeadersMiddleware
 
+from backend.src.config.logger import get_logger
+
 # Setup standard logger
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info("Application starting up...")
     # Startup seed test user
     from backend.src.config.database import SessionLocal
     from backend.src.models import user
@@ -29,10 +31,15 @@ async def lifespan(app: FastAPI):
             db.add(new_user)
             db.commit()
             logger.info("Test user created successfully.")
+    except Exception as e:
+        logger.error(f"Error during startup: {e}")
+        raise
     finally:
         db.close()
     
     yield
+    
+    logger.info("Application shutting down...")
 
 app = FastAPI(title="Teunpass API", description="FastAPI + SQLAlchemy", lifespan=lifespan)
 
@@ -51,4 +58,5 @@ app.include_router(vault_items.router)
 
 @app.get("/")
 def read_root():
+    logger.debug("Health check / endpoint called")
     return {"message": "Teunpass test test"}
