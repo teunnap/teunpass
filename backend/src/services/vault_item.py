@@ -60,8 +60,10 @@ def update_item(
     db: Session, item_id: uuid.UUID, user_id: uuid.UUID, data: VaultItemCreate
 ) -> VaultItem:
     """
-    Update een vaultitem. Gooit 404 als het item niet gevonden wordt voor de gebruiker.
+    Vervangt een vaultitem volledig
     """
+    _validate_url(data.e_url)
+
     item = (
         db.query(VaultItem)
         .filter(VaultItem.vaultitem_id == item_id, VaultItem.user_id == user_id)
@@ -72,8 +74,6 @@ def update_item(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Vault item not found",
         )
-
-    _validate_url(data.e_url)
 
     item.e_title = data.e_title
     item.e_url = data.e_url

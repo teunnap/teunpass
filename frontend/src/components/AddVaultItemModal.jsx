@@ -39,8 +39,13 @@ const Field = ({ label, error, touched, warning, children }) => (
   </div>
 );
 
-export default function AddVaultItemModal({ onClose, onSaved }) {
-  const [form, setForm]       = useState(EMPTY_FORM);
+export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
+  const [form, setForm]       = useState(initialData ? {
+    e_title: initialData.e_title || '',
+    e_url: initialData.e_url || '',
+    e_username: initialData.e_username || '',
+    e_password: initialData.e_password || '',
+  } : EMPTY_FORM);
   const [touched, setTouched] = useState(EMPTY_TOUCHED);
   const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving]   = useState(false);
@@ -62,10 +67,14 @@ export default function AddVaultItemModal({ onClose, onSaved }) {
     setApiError(null);
     try {
       const API_URL = import.meta.env.VITE_API_URL;
-      const response = await fetch(`${API_URL}/vaultitems/create`, {
-        method: 'POST',
+      const isEditing = !!initialData;
+      const endpoint = isEditing ? `/vaultitems/${initialData.vaultitem_id}` : '/vaultitems/create';
+      const method = isEditing ? 'PUT' : 'POST';
+      
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, custom_fields: [] }),
+        body: JSON.stringify({ ...form, custom_fields: initialData?.custom_fields ?? [] }),
       });
       if (!response.ok) throw new Error('Failed to save item.');
       onSaved(await response.json());
@@ -91,8 +100,12 @@ export default function AddVaultItemModal({ onClose, onSaved }) {
           >
             <X className="w-5 h-5" />
           </button>
-          <h2 className="text-2xl font-bold text-slate-900 mb-1">Create New Item</h2>
-          <p className="text-slate-500 text-sm">Store a new credential securely within your encrypted vault.</p>
+          <h2 className="text-2xl font-bold text-slate-900 mb-1">
+            {initialData ? 'Edit Item' : 'Create New Item'}
+          </h2>
+          <p className="text-slate-500 text-sm">
+            {initialData ? 'Update your secure credential data below.' : 'Store a new credential securely within your encrypted vault.'}
+          </p>
         </div>
 
         {/* Form body */}
