@@ -31,8 +31,8 @@ async def lifespan(app: FastAPI):
             db.add(new_user)
             db.commit()
             logger.info("Test user created successfully.")
-    except Exception as e:
-        logger.error(f"Error during startup: {e}")
+    except Exception:
+        logger.exception("Error during startup")
         raise
     finally:
         db.close()
