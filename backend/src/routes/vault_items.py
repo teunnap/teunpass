@@ -7,6 +7,9 @@ from sqlalchemy.orm import Session
 from backend.src.config.database import get_db
 from backend.src.schemas.vault_item import VaultItemCreate, VaultItemResponse
 from backend.src.services import vault_item as vault_item_service
+from backend.src.config.logger import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/vaultitems", tags=["Vault Items"])
 
@@ -20,6 +23,7 @@ def get_vault_items(db: Session = Depends(get_db)):
     Geeft alle vaultitems van gebruiker terug.
     Authenticated: Yes
     """
+    logger.info(f"Fetching vault items for user: {_PLACEHOLDER_USER_ID}")
     return vault_item_service.get_items_for_user(db, user_id=_PLACEHOLDER_USER_ID)
 
 
@@ -30,6 +34,7 @@ def create_vault_item(data: VaultItemCreate, db: Session = Depends(get_db)):
     Authenticated: Yes
     Body: Title, url, username, password, customfields (allemaal encrypted)
     """
+    logger.info(f"Creating vault item for user: {_PLACEHOLDER_USER_ID}")
     return vault_item_service.create_item(db, user_id=_PLACEHOLDER_USER_ID, data=data)
 
 
@@ -40,6 +45,7 @@ def update_vault_item(id: uuid.UUID, data: VaultItemCreate, db: Session = Depend
     Authenticated: Yes
     Body: Title, url, username, password, customfields (allemaal encrypted)
     """
+    logger.info(f"Updating vault item: {id} for user: {_PLACEHOLDER_USER_ID}")
     return vault_item_service.update_item(db, item_id=id, user_id=_PLACEHOLDER_USER_ID, data=data)
 
 
@@ -49,4 +55,5 @@ def delete_vault_item(id: uuid.UUID, db: Session = Depends(get_db)):
     Verwijdert een vaultitem.
     Authenticated: Yes
     """
+    logger.info(f"Deleting vault item: {id} for user: {_PLACEHOLDER_USER_ID}")
     vault_item_service.delete_item(db, item_id=id, user_id=_PLACEHOLDER_USER_ID)

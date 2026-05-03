@@ -5,12 +5,16 @@ from sqlalchemy.orm import Session, joinedload
 
 from backend.src.models.vault_item import VaultItem, CustomField
 from backend.src.schemas.vault_item import VaultItemCreate
+from backend.src.config.logger import get_logger
+
+logger = get_logger(__name__)
 
 URL_PATTERN = re.compile(r"^https?://[\w-]+(\.[\w-]+)+([/?#][^\s]*)?$")
 
 
 def _validate_url(url: str | None) -> None:
     if url and not URL_PATTERN.fullmatch(url):
+        logger.warning(f"Invalid URL format attempted: {url}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid URL format",
@@ -21,6 +25,7 @@ def get_items_for_user(db: Session, user_id: uuid.UUID) -> list[VaultItem]:
     """
     Haalt alle vaultitems op voor de opgegeven gebruiker.
     """
+    logger.debug(f"Querying vault items for user {user_id}")
     return (
         db.query(VaultItem)
         .options(joinedload(VaultItem.custom_fields))
@@ -53,6 +58,7 @@ def create_item(db: Session, user_id: uuid.UUID, data: VaultItemCreate) -> Vault
     db.add(item)
     db.commit()
     db.refresh(item)
+    logger.debug(f"Created new vault item {item.vaultitem_id} for user {user_id}")
     return item
 
 
@@ -70,6 +76,7 @@ def update_item(
         .first()
     )
     if not item:
+        logger.warning(f"Vault item {item_id} not found for user {user_id} during update")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Vault item not found",
@@ -86,6 +93,7 @@ def update_item(
 
     db.commit()
     db.refresh(item)
+    logger.debug(f"Updated vault item {item_id} for user {user_id}")
     return item
 
 
@@ -99,6 +107,7 @@ def delete_item(db: Session, item_id: uuid.UUID, user_id: uuid.UUID) -> None:
         .first()
     )
     if not item:
+        logger.warning(f"Vault item {item_id} not found for user {user_id} during delete")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Vault item not found",
@@ -106,3 +115,4 @@ def delete_item(db: Session, item_id: uuid.UUID, user_id: uuid.UUID) -> None:
 
     db.delete(item)
     db.commit()
+    logger.debug(f"Deleted vault item {item_id} for user {user_id}")
