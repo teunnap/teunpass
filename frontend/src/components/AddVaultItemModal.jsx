@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Eye, EyeOff, Zap } from 'lucide-react';
+import { apiFetch } from '../lib/api';
 
 const EMPTY_FORM    = { e_title: '', e_url: '', e_username: '', e_password: '' };
 const EMPTY_TOUCHED = { e_title: false, e_url: false, e_password: false };
@@ -66,14 +67,12 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
     setSaving(true);
     setApiError(null);
     try {
-      const API_URL = import.meta.env.VITE_API_URL;
       const isEditing = !!initialData;
       const endpoint = isEditing ? `/vaultitems/${initialData.vaultitem_id}` : '/vaultitems/create';
       const method = isEditing ? 'PUT' : 'POST';
       
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const response = await apiFetch(endpoint, {
         method: method,
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, custom_fields: initialData?.custom_fields ?? [] }),
       });
       if (!response.ok) throw new Error('Failed to save item.');

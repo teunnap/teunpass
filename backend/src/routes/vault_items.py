@@ -13,47 +13,47 @@ logger = get_logger(__name__)
 
 router = APIRouter(prefix="/vaultitems", tags=["Vault Items"])
 
-# TODO: vervang met authentication
-_PLACEHOLDER_USER_ID = uuid.UUID(int=1)
+from backend.src.middleware.auth import get_current_user
+from backend.src.models.user import User
 
 
 @router.get("/", response_model=List[VaultItemResponse])
-def get_vault_items(db: Session = Depends(get_db)):
+def get_vault_items(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Geeft alle vaultitems van gebruiker terug.
     Authenticated: Yes
     """
-    logger.info(f"Fetching vault items for user: {_PLACEHOLDER_USER_ID}")
-    return vault_item_service.get_items_for_user(db, user_id=_PLACEHOLDER_USER_ID)
+    logger.info(f"Fetching vault items for user: {current_user.id}")
+    return vault_item_service.get_items_for_user(db, user_id=current_user.id)
 
 
 @router.post("/create", response_model=VaultItemResponse, status_code=status.HTTP_201_CREATED)
-def create_vault_item(data: VaultItemCreate, db: Session = Depends(get_db)):
+def create_vault_item(data: VaultItemCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Maakt een nieuw vaultitem aan gelinkt aan gebruiker.
     Authenticated: Yes
     Body: Title, url, username, password, customfields (allemaal encrypted)
     """
-    logger.info(f"Creating vault item for user: {_PLACEHOLDER_USER_ID}")
-    return vault_item_service.create_item(db, user_id=_PLACEHOLDER_USER_ID, data=data)
+    logger.info(f"Creating vault item for user: {current_user.id}")
+    return vault_item_service.create_item(db, user_id=current_user.id, data=data)
 
 
 @router.put("/{id}", response_model=VaultItemResponse)
-def update_vault_item(id: uuid.UUID, data: VaultItemCreate, db: Session = Depends(get_db)):
+def update_vault_item(id: uuid.UUID, data: VaultItemCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Update een vaultitem.
     Authenticated: Yes
     Body: Title, url, username, password, customfields (allemaal encrypted)
     """
-    logger.info(f"Updating vault item: {id} for user: {_PLACEHOLDER_USER_ID}")
-    return vault_item_service.update_item(db, item_id=id, user_id=_PLACEHOLDER_USER_ID, data=data)
+    logger.info(f"Updating vault item: {id} for user: {current_user.id}")
+    return vault_item_service.update_item(db, item_id=id, user_id=current_user.id, data=data)
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_vault_item(id: uuid.UUID, db: Session = Depends(get_db)):
+def delete_vault_item(id: uuid.UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Verwijdert een vaultitem.
     Authenticated: Yes
     """
-    logger.info(f"Deleting vault item: {id} for user: {_PLACEHOLDER_USER_ID}")
-    vault_item_service.delete_item(db, item_id=id, user_id=_PLACEHOLDER_USER_ID)
+    logger.info(f"Deleting vault item: {id} for user: {current_user.id}")
+    vault_item_service.delete_item(db, item_id=id, user_id=current_user.id)

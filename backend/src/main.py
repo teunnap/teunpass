@@ -2,7 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.src.routes import vault_items
+from backend.src.routes import vault_items, auth
 from backend.src.middleware.security_headers import SecurityHeadersMiddleware
 
 from backend.src.config.logger import get_logger
@@ -55,6 +55,7 @@ app.add_middleware(
 )
 
 app.include_router(vault_items.router)
+app.include_router(auth.router)
 
 @app.get("/")
 def read_root():
