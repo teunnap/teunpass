@@ -8,13 +8,18 @@ import {
   Plus, 
   Copy, 
   Trash2, 
-  Pencil
+  Pencil,
+  LogOut
 } from 'lucide-react';
 import Notification from './components/Notification';
 import { useNotification } from './hooks/useNotification';
 import AddVaultItemModal from './components/AddVaultItemModal';
+import Login from './components/Login';
+import { apiFetch } from './lib/api';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [masterKey, setMasterKey] = useState(null);
   const [vaultItems, setVaultItems] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -22,6 +27,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   const openCreateModal = () => {
     setEditingItem(null);
@@ -49,9 +55,13 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const API_URL = import.meta.env.VITE_API_URL;
-      const response = await fetch(`${API_URL}/vaultitems/`);
+      const response = await apiFetch('/vaultitems/');
       if (!response.ok) {
+        if (response.status === 401) {
+            setIsAuthenticated(false);
+            sessionStorage.removeItem('token');
+            throw new Error('Authentication required');
+        }
         throw new Error('Failed to fetch from API');
       }
       const data = await response.json();
@@ -65,13 +75,21 @@ function App() {
   };
 
   useEffect(() => {
-    fetchVaultItems();
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      setIsAuthenticated(true);
+    }
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchVaultItems();
+    }
+  }, [isAuthenticated]);
 
   const handleDelete = async (itemId) => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL;
-      const response = await fetch(`${API_URL}/vaultitems/${itemId}`, {
+      const response = await apiFetch(`/vaultitems/${itemId}`, {
         method: 'DELETE',
       });
       
@@ -131,6 +149,23 @@ function App() {
     return titleMatch || userMatch;
   }) : null;
 
+  const handleLoginSuccess = (token, mKeyBuffer) => {
+    setIsAuthenticated(true);
+    setMasterKey(mKeyBuffer);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setMasterKey(null);
+    setVaultItems(null);
+    sessionStorage.removeItem('token');
+    setShowProfileDropdown(false);
+  };
+
+  if (!isAuthenticated) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="flex min-h-screen bg-[#F4F7FB] font-sans text-slate-800">
       
@@ -165,10 +200,33 @@ function App() {
         
         {/* TOP HEADER */}
         <header className="h-16 flex items-center justify-end px-8 gap-5">
-            <RefreshCw className="w-5 h-5 text-slate-400 hover:text-slate-600 cursor-pointer" />
-            <Settings className="w-5 h-5 text-slate-400 hover:text-slate-600 cursor-pointer" />
-            <div className="w-8 h-8 rounded-full bg-[#0A4AEF] flex items-center justify-center text-white cursor-pointer overflow-hidden">
-                <UserIcon className="w-5 h-5" />
+            <RefreshCw className="w-5 h-5 text-slate-400 hover:text-slate-600 cursor-pointer" onClick={fetchVaultItems} />
+            <div className="relative">
+              <div 
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                className="w-8 h-8 rounded-full bg-[#0A4AEF] flex items-center justify-center text-white cursor-pointer hover:bg-blue-700 transition-colors"
+                title="Profile"
+              >
+                  <UserIcon className="w-5 h-5" />
+              </div>
+
+              {showProfileDropdown && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setShowProfileDropdown(false)}
+                  ></div>
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Log Out
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
         </header>
 
