@@ -21,14 +21,14 @@ function Login({ onLoginSuccess }) {
 
     setIsLoading(true);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const normalizedEmail = email.toLowerCase().trim();
       
-      const masterKeyBuffer = await deriveMasterKey(password, email);
+      const masterKeyBuffer = await deriveMasterKey(password, normalizedEmail);
       
       if (isLogin) {
         const saltRes = await apiFetch('/auth/salt', {
           method: 'POST',
-          body: JSON.stringify({ email: email.toLowerCase().trim() })
+          body: JSON.stringify({ email: normalizedEmail })
         });
         
         if (!saltRes.ok) {
@@ -42,7 +42,7 @@ function Login({ onLoginSuccess }) {
         const loginRes = await apiFetch('/auth/login', {
           method: 'POST',
           body: JSON.stringify({ 
-            email: email.toLowerCase().trim(),
+            email: normalizedEmail,
             authentication_hash: authHash
           })
         });
@@ -67,7 +67,7 @@ function Login({ onLoginSuccess }) {
         const regRes = await apiFetch('/auth/register', {
           method: 'POST',
           body: JSON.stringify({
-            email: email.toLowerCase().trim(),
+            email: normalizedEmail,
             authentication_hash: authHash
           })
         });
