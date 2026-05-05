@@ -1,3 +1,4 @@
+import secrets
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from backend.src.config.database import get_db
@@ -14,7 +15,7 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
 def get_salt(data: LoginSaltRequest, db: Session = Depends(get_db)):
     salt = AuthService.get_user_salt(db, data.email)
     if not salt:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        salt = secrets.token_hex(32)
     return {"auth_salt": salt}
 
 @router.post("/login", response_model=TokenResponse)

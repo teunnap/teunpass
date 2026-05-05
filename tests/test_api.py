@@ -2,12 +2,17 @@ import pytest
 from fastapi.testclient import TestClient
 from backend.src.main import app
 import uuid
+import jwt
+from datetime import datetime, timedelta, timezone
 from backend.src.config.database import Base, engine, get_db, DATABASE_URL
+from backend.src.config.settings import settings
+from backend.src.models.user import User, UserRole
 import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 TEST_DATABASE_URL = DATABASE_URL + "_test"
+TEST_USER_ID = uuid.UUID(int=1)
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_database():
@@ -20,12 +25,10 @@ def setup_test_database():
     test_engine = create_engine(TEST_DATABASE_URL)
     Base.metadata.create_all(bind=test_engine)
 
-    from backend.src.models.user import User, UserRole
-    import uuid
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
     db = TestingSessionLocal()
     new_user = User(
-        id=uuid.UUID(int=1),
+        id=TEST_USER_ID,
         email="test@example.com",
         master_password_hash="0" * 64,
         auth_salt="1" * 64,
@@ -50,15 +53,26 @@ def setup_test_database():
     Base.metadata.drop_all(bind=test_engine)
     test_engine.dispose()
 
+@pytest.fixture(scope="session")
+def auth_token():
+    expire = datetime.now(timezone.utc) + timedelta(minutes=60)
+    to_encode = {"sub": str(TEST_USER_ID), "exp": expire}
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
 @pytest.fixture(scope="module")
-def client():
-    with TestClient(app) as c:
+def client(auth_token):
+    with TestClient(app, headers={"Authorization": f"Bearer {auth_token}"}) as c:
         yield c
 
 def test_read_root(client):
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"message": "Teunpass test test"}
+
+def test_unauthenticated_access_is_rejected():
+    with TestClient(app) as c:
+        response = c.get("/vaultitems/")
+    assert response.status_code == 403
 
 created_item_id = None
 

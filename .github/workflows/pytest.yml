@@ -46,5 +46,6 @@ jobs:
       - name: Run tests with Pytest
         env:
           DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/teunpass
+          SECRET_KEY: test-secret-key-for-ci
         run: |
           pytest tests/
