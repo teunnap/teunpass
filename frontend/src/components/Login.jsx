@@ -5,6 +5,15 @@ import { deriveMasterKey, generateAuthenticationHash } from '../lib/crypto';
 import Notification from './Notification';
 import { apiFetch } from '../lib/api';
 
+const validatePassword = (password) => {
+  if (password.length < 12) return 'Master password must be at least 12 characters long';
+  if (!/[A-Z]/.test(password)) return 'Master password must contain at least one uppercase letter';
+  if (!/[a-z]/.test(password)) return 'Master password must contain at least one lowercase letter';
+  if (!/[0-9]/.test(password)) return 'Master password must contain at least one number';
+  if (!/[^A-Za-z0-9]/.test(password)) return 'Master password must contain at least one special character';
+  return null;
+};
+
 function Login({ onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -17,6 +26,14 @@ function Login({ onLoginSuccess }) {
     if (!email || !password) {
       showNotification('Please fill in all fields', 'warning');
       return;
+    }
+
+    if (!isLogin) {
+      const passwordError = validatePassword(password);
+      if (passwordError) {
+        showNotification(passwordError, 'warning');
+        return;
+      }
     }
 
     setIsLoading(true);
