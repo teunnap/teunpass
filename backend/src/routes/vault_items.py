@@ -46,7 +46,7 @@ def update_vault_item(id: uuid.UUID, data: VaultItemCreate, db: Session = Depend
     Body: Title, url, username, password, customfields (allemaal encrypted)
     """
     logger.info(f"Updating vault item: {id} for user: {current_user.id}")
-    return vault_item_service.update_item(db, item_id=id, user_id=current_user.id, data=data)
+    return vault_item_service.update_item(db, item_id=id, user=current_user, data=data)
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)

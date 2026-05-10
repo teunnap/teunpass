@@ -48,6 +48,13 @@ def create_item(db: Session, user: User, data: VaultItemCreate) -> VaultItem:
     Valideert het URL-formaat indien aanwezig.
     """
     if user.role == UserRole.default:
+        if data.custom_fields and len(data.custom_fields) > 0:
+            logger.warning(f"User {user.id} attempted to use custom fields but is not premium")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Custom fields are a premium feature."
+            )
+
         item_count = get_item_count_for_user(db, user.id)
         if item_count >= 5:
             logger.warning(f"User {user.id} has reached the maximum number of vault items")
@@ -80,20 +87,27 @@ def create_item(db: Session, user: User, data: VaultItemCreate) -> VaultItem:
 
 
 def update_item(
-    db: Session, item_id: uuid.UUID, user_id: uuid.UUID, data: VaultItemCreate
+    db: Session, item_id: uuid.UUID, user: User, data: VaultItemCreate
 ) -> VaultItem:
     """
     Vervangt een vaultitem volledig
     """
+    if user.role == UserRole.default and data.custom_fields and len(data.custom_fields) > 0:
+        logger.warning(f"User {user.id} attempted to use custom fields during update but is not premium")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Custom fields are a premium feature."
+        )
+
     _validate_url(data.e_url)
 
     item = (
         db.query(VaultItem)
-        .filter(VaultItem.vaultitem_id == item_id, VaultItem.user_id == user_id)
+        .filter(VaultItem.vaultitem_id == item_id, VaultItem.user_id == user.id)
         .first()
     )
     if not item:
-        logger.warning(f"Vault item {item_id} not found for user {user_id} during update")
+        logger.warning(f"Vault item {item_id} not found for user {user.id} during update")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Vault item not found",
@@ -110,7 +124,7 @@ def update_item(
 
     db.commit()
     db.refresh(item)
-    logger.debug(f"Updated vault item {item_id} for user {user_id}")
+    logger.debug(f"Updated vault item {item_id} for user {user.id}")
     return item
 
 
