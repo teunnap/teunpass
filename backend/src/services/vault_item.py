@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
 from backend.src.models.vault_item import VaultItem, CustomField
+from backend.src.models.user import User, UserRole
 from backend.src.schemas.vault_item import VaultItemCreate
 from backend.src.config.logger import get_logger
 
@@ -34,11 +35,34 @@ def get_items_for_user(db: Session, user_id: uuid.UUID) -> list[VaultItem]:
     )
 
 
-def create_item(db: Session, user_id: uuid.UUID, data: VaultItemCreate) -> VaultItem:
+def get_item_count_for_user(db: Session, user_id: uuid.UUID) -> int:
+    """
+    Geeft het totaal aantal vaultitems van de gebruiker terug.
+    """
+    return db.query(VaultItem).filter(VaultItem.user_id == user_id).count()
+
+
+def create_item(db: Session, user: User, data: VaultItemCreate) -> VaultItem:
     """
     Maakt een nieuw vaultitem aan gelinkt aan de opgegeven gebruiker.
     Valideert het URL-formaat indien aanwezig.
     """
+    if user.role == UserRole.default:
+        if data.custom_fields and len(data.custom_fields) > 0:
+            logger.warning(f"User {user.id} attempted to use custom fields but is not premium")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Custom fields are a premium feature."
+            )
+
+        item_count = get_item_count_for_user(db, user.id)
+        if item_count >= 5:
+            logger.warning(f"User {user.id} has reached the maximum number of vault items")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Maximum amount of vaultitems reached"
+            )
+
     _validate_url(data.e_url)
 
     custom_fields = [
@@ -47,7 +71,7 @@ def create_item(db: Session, user_id: uuid.UUID, data: VaultItemCreate) -> Vault
     ]
 
     item = VaultItem(
-        user_id=user_id,
+        user_id=user.id,
         e_title=data.e_title,
         e_url=data.e_url,
         e_username=data.e_username,
@@ -58,25 +82,32 @@ def create_item(db: Session, user_id: uuid.UUID, data: VaultItemCreate) -> Vault
     db.add(item)
     db.commit()
     db.refresh(item)
-    logger.debug(f"Created new vault item {item.vaultitem_id} for user {user_id}")
+    logger.debug(f"Created new vault item {item.vaultitem_id} for user {user.id}")
     return item
 
 
 def update_item(
-    db: Session, item_id: uuid.UUID, user_id: uuid.UUID, data: VaultItemCreate
+    db: Session, item_id: uuid.UUID, user: User, data: VaultItemCreate
 ) -> VaultItem:
     """
     Vervangt een vaultitem volledig
     """
+    if user.role == UserRole.default and data.custom_fields and len(data.custom_fields) > 0:
+        logger.warning(f"User {user.id} attempted to use custom fields during update but is not premium")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Custom fields are a premium feature."
+        )
+
     _validate_url(data.e_url)
 
     item = (
         db.query(VaultItem)
-        .filter(VaultItem.vaultitem_id == item_id, VaultItem.user_id == user_id)
+        .filter(VaultItem.vaultitem_id == item_id, VaultItem.user_id == user.id)
         .first()
     )
     if not item:
-        logger.warning(f"Vault item {item_id} not found for user {user_id} during update")
+        logger.warning(f"Vault item {item_id} not found for user {user.id} during update")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Vault item not found",
@@ -93,7 +124,7 @@ def update_item(
 
     db.commit()
     db.refresh(item)
-    logger.debug(f"Updated vault item {item_id} for user {user_id}")
+    logger.debug(f"Updated vault item {item_id} for user {user.id}")
     return item
 
 

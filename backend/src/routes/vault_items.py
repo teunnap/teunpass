@@ -35,7 +35,7 @@ def create_vault_item(data: VaultItemCreate, db: Session = Depends(get_db), curr
     Body: Title, url, username, password, customfields (allemaal encrypted)
     """
     logger.info(f"Creating vault item for user: {current_user.id}")
-    return vault_item_service.create_item(db, user_id=current_user.id, data=data)
+    return vault_item_service.create_item(db, user=current_user, data=data)
 
 
 @router.put("/{id}", response_model=VaultItemResponse)
@@ -46,7 +46,7 @@ def update_vault_item(id: uuid.UUID, data: VaultItemCreate, db: Session = Depend
     Body: Title, url, username, password, customfields (allemaal encrypted)
     """
     logger.info(f"Updating vault item: {id} for user: {current_user.id}")
-    return vault_item_service.update_item(db, item_id=id, user_id=current_user.id, data=data)
+    return vault_item_service.update_item(db, item_id=id, user=current_user, data=data)
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
