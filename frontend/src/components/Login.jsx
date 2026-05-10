@@ -5,11 +5,21 @@ import { deriveMasterKey, generateAuthenticationHash } from '../lib/crypto';
 import Notification from './Notification';
 import { apiFetch } from '../lib/api';
 
+const validatePassword = (password) => {
+  if (password.length < 12) return 'Master password must be at least 12 characters long';
+  if (!/[A-Z]/.test(password)) return 'Master password must contain at least one uppercase letter';
+  if (!/[a-z]/.test(password)) return 'Master password must contain at least one lowercase letter';
+  if (!/[0-9]/.test(password)) return 'Master password must contain at least one number';
+  if (!/[^A-Za-z0-9]/.test(password)) return 'Master password must contain at least one special character';
+  return null;
+};
+
 function Login({ onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [recoveryAcknowledged, setRecoveryAcknowledged] = useState(false);
   const { notification, showNotification } = useNotification();
 
   const handleSubmit = async (e) => {
@@ -17,6 +27,18 @@ function Login({ onLoginSuccess }) {
     if (!email || !password) {
       showNotification('Please fill in all fields', 'warning');
       return;
+    }
+
+    if (!isLogin) {
+      if (!recoveryAcknowledged) {
+        showNotification('Please confirm that you understand there is no password recovery', 'warning');
+        return;
+      }
+      const passwordError = validatePassword(password);
+      if (passwordError) {
+        showNotification(passwordError, 'warning');
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -140,6 +162,24 @@ function Login({ onLoginSuccess }) {
                 </div>
               </div>
 
+              {!isLogin && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 mt-4 shadow-sm hover:bg-amber-100/50 transition-colors">
+                  <div className="flex items-center h-5 mt-0.5">
+                    <input
+                      id="recovery-acknowledgement"
+                      type="checkbox"
+                      checked={recoveryAcknowledged}
+                      onChange={(e) => setRecoveryAcknowledged(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 bg-white border-amber-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                    />
+                  </div>
+                  <label htmlFor="recovery-acknowledgement" className="text-sm text-amber-800 cursor-pointer select-none">
+                    <span className="font-bold block mb-0.5">I understand there is no password recovery</span>
+                    <span className="leading-snug block">Due to the zero-knowledge architecture, it is <strong>impossible</strong> to recover my master password if I forget it.</span>
+                  </label>
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={isLoading}
@@ -162,7 +202,10 @@ function Login({ onLoginSuccess }) {
             <p className="text-slate-600 font-medium">
               {isLogin ? "Don't have a vault yet?" : "Already have a vault?"}
               <button
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  if (isLogin) setRecoveryAcknowledged(false);
+                }}
                 className="ml-2 text-blue-600 hover:text-blue-800 font-bold hover:underline transition-colors focus:outline-none"
               >
                 {isLogin ? 'Register now' : 'Login instead'}
