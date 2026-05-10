@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
 from backend.src.models.vault_item import VaultItem, CustomField
+from backend.src.models.user import User, UserRole
 from backend.src.schemas.vault_item import VaultItemCreate
 from backend.src.config.logger import get_logger
 
@@ -34,11 +35,27 @@ def get_items_for_user(db: Session, user_id: uuid.UUID) -> list[VaultItem]:
     )
 
 
-def create_item(db: Session, user_id: uuid.UUID, data: VaultItemCreate) -> VaultItem:
+def get_item_count_for_user(db: Session, user_id: uuid.UUID) -> int:
+    """
+    Geeft het totaal aantal vaultitems van de gebruiker terug.
+    """
+    return db.query(VaultItem).filter(VaultItem.user_id == user_id).count()
+
+
+def create_item(db: Session, user: User, data: VaultItemCreate) -> VaultItem:
     """
     Maakt een nieuw vaultitem aan gelinkt aan de opgegeven gebruiker.
     Valideert het URL-formaat indien aanwezig.
     """
+    if user.role == UserRole.default:
+        item_count = get_item_count_for_user(db, user.id)
+        if item_count >= 5:
+            logger.warning(f"User {user.id} has reached the maximum number of vault items")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Maximum amount of vaultitems reached"
+            )
+
     _validate_url(data.e_url)
 
     custom_fields = [
@@ -47,7 +64,7 @@ def create_item(db: Session, user_id: uuid.UUID, data: VaultItemCreate) -> Vault
     ]
 
     item = VaultItem(
-        user_id=user_id,
+        user_id=user.id,
         e_title=data.e_title,
         e_url=data.e_url,
         e_username=data.e_username,
@@ -58,7 +75,7 @@ def create_item(db: Session, user_id: uuid.UUID, data: VaultItemCreate) -> Vault
     db.add(item)
     db.commit()
     db.refresh(item)
-    logger.debug(f"Created new vault item {item.vaultitem_id} for user {user_id}")
+    logger.debug(f"Created new vault item {item.vaultitem_id} for user {user.id}")
     return item
 
 

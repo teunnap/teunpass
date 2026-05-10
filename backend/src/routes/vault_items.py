@@ -35,7 +35,7 @@ def create_vault_item(data: VaultItemCreate, db: Session = Depends(get_db), curr
     Body: Title, url, username, password, customfields (allemaal encrypted)
     """
     logger.info(f"Creating vault item for user: {current_user.id}")
-    return vault_item_service.create_item(db, user_id=current_user.id, data=data)
+    return vault_item_service.create_item(db, user=current_user, data=data)
 
 
 @router.put("/{id}", response_model=VaultItemResponse)
