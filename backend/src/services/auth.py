@@ -9,12 +9,11 @@ from backend.src.config.settings import settings
 
 class AuthService:
     @staticmethod
-    def register_user(db: Session, email: str, authentication_hash: str):
+    def register_user(db: Session, email: str, authentication_hash: str, auth_salt: str):
         existing_user = db.query(User).filter(User.email == email).first()
         if existing_user:
             raise HTTPException(status_code=400, detail="Email already registered")
         
-        auth_salt = secrets.token_hex(32)
         new_user = User(
             email=email,
             master_password_hash=authentication_hash,

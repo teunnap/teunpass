@@ -3,6 +3,7 @@ from pydantic import BaseModel, EmailStr
 class RegisterRequest(BaseModel):
     email: EmailStr
     authentication_hash: str
+    auth_salt: str
 
 class LoginSaltRequest(BaseModel):
     email: EmailStr
