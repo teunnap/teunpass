@@ -59,7 +59,7 @@ function Login({ onLoginSuccess }) {
         
         const { auth_salt } = await saltRes.json();
         
-        const authHash = await generateAuthenticationHash(masterKeyBuffer, null);
+        const authHash = await generateAuthenticationHash(masterKeyBuffer, auth_salt);
         
         const loginRes = await apiFetch('/auth/login', {
           method: 'POST',
@@ -84,13 +84,18 @@ function Login({ onLoginSuccess }) {
         }
         
       } else {
-        const authHash = await generateAuthenticationHash(masterKeyBuffer, null);
+        const randomBytes = new Uint8Array(32);
+        window.crypto.getRandomValues(randomBytes);
+        const authSaltHex = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
+        const authHash = await generateAuthenticationHash(masterKeyBuffer, authSaltHex);
         
         const regRes = await apiFetch('/auth/register', {
           method: 'POST',
           body: JSON.stringify({
             email: normalizedEmail,
-            authentication_hash: authHash
+            authentication_hash: authHash,
+            auth_salt: authSaltHex
           })
         });
         
