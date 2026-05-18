@@ -1,7 +1,7 @@
 import uuid
 from typing import List
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Request
 from sqlalchemy.orm import Session
 
 from backend.src.config.database import get_db
@@ -12,13 +12,15 @@ from backend.src.config.logger import get_logger
 logger = get_logger(__name__)
 
 router = APIRouter(prefix="/vaultitems", tags=["Vault Items"])
+from backend.src.config.limiter import limiter
 
 from backend.src.middleware.auth import get_current_user
 from backend.src.models.user import User
 
 
 @router.get("/", response_model=List[VaultItemResponse])
-def get_vault_items(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@limiter.limit("10/minute")
+def get_vault_items(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Geeft alle vaultitems van gebruiker terug.
     Authenticated: Yes
@@ -28,7 +30,8 @@ def get_vault_items(db: Session = Depends(get_db), current_user: User = Depends(
 
 
 @router.post("/create", response_model=VaultItemResponse, status_code=status.HTTP_201_CREATED)
-def create_vault_item(data: VaultItemCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@limiter.limit("10/minute")
+def create_vault_item(request: Request, data: VaultItemCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Maakt een nieuw vaultitem aan gelinkt aan gebruiker.
     Authenticated: Yes
@@ -39,7 +42,8 @@ def create_vault_item(data: VaultItemCreate, db: Session = Depends(get_db), curr
 
 
 @router.put("/{id}", response_model=VaultItemResponse)
-def update_vault_item(id: uuid.UUID, data: VaultItemCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@limiter.limit("10/minute")
+def update_vault_item(request: Request, id: uuid.UUID, data: VaultItemCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Update een vaultitem.
     Authenticated: Yes
@@ -50,7 +54,8 @@ def update_vault_item(id: uuid.UUID, data: VaultItemCreate, db: Session = Depend
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_vault_item(id: uuid.UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@limiter.limit("60/minute")
+def delete_vault_item(request: Request, id: uuid.UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Verwijdert een vaultitem.
     Authenticated: Yes

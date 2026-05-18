@@ -4,6 +4,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.src.routes import vault_items, auth
 from backend.src.middleware.security_headers import SecurityHeadersMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from backend.src.config.limiter import limiter
 
 from backend.src.config.logger import get_logger
 
@@ -42,6 +45,8 @@ async def lifespan(app: FastAPI):
     logger.info("Application shutting down...")
 
 app = FastAPI(title="Teunpass API", description="FastAPI + SQLAlchemy", lifespan=lifespan)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(SecurityHeadersMiddleware)
 
