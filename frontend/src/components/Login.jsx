@@ -126,8 +126,8 @@ function Login({ onLoginSuccess }) {
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/50">
           <div className="p-8 sm:p-10">
             <div className="flex justify-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                <Shield className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 transform rotate-3 hover:rotate-0 transition-transform duration-300" aria-hidden="true">
+                <Shield className="w-8 h-8 text-white" aria-hidden="true" />
               </div>
             </div>
             
@@ -140,29 +140,33 @@ function Login({ onLoginSuccess }) {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-slate-700 ml-1">Email Address</label>
+                <label htmlFor="email-input" className="text-sm font-semibold text-slate-700 ml-1">Email Address</label>
                 <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" aria-hidden="true" />
                   <input
+                    id="email-input"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-slate-50 border-2 border-slate-200 text-slate-800 rounded-xl px-11 py-3.5 focus:outline-none focus:border-blue-500 focus:bg-white transition-all font-medium"
                     placeholder="you@example.com"
+                    aria-required="true"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-slate-700 ml-1">Master Password</label>
+                <label htmlFor="password-input" className="text-sm font-semibold text-slate-700 ml-1">Master Password</label>
                 <div className="relative group">
-                  <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                  <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" aria-hidden="true" />
                   <input
+                    id="password-input"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full bg-slate-50 border-2 border-slate-200 text-slate-800 rounded-xl px-11 py-3.5 focus:outline-none focus:border-blue-500 focus:bg-white transition-all font-medium"
                     placeholder="Enter your master password"
+                    aria-required="true"
                   />
                 </div>
               </div>
@@ -188,15 +192,16 @@ function Login({ onLoginSuccess }) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl py-4 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none mt-4"
+                aria-busy={isLoading}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl py-4 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none mt-4 focus:outline-none focus:ring-4 focus:ring-blue-500/50"
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
                 ) : (
                   <>
-                    <Lock className="w-5 h-5" />
+                    <Lock className="w-5 h-5" aria-hidden="true" />
                     {isLogin ? 'Unlock Vault' : 'Create Vault'}
-                    <ArrowRight className="w-5 h-5 ml-1" />
+                    <ArrowRight className="w-5 h-5 ml-1" aria-hidden="true" />
                   </>
                 )}
               </button>

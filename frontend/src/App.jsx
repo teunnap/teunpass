@@ -199,16 +199,21 @@ function App() {
       <main className="flex-1 flex flex-col">
         
         {/* TOP HEADER */}
-        <header className="h-16 flex items-center justify-end px-8 gap-5">
-            <RefreshCw className="w-5 h-5 text-slate-400 hover:text-slate-600 cursor-pointer" onClick={fetchVaultItems} />
+        <header className="h-16 flex items-center justify-end px-8 gap-5" role="banner">
+            <button aria-label="Refresh Vault Items" onClick={fetchVaultItems} className="text-slate-400 hover:text-slate-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0A4AEF] rounded">
+              <RefreshCw className="w-5 h-5" aria-hidden="true" />
+            </button>
             <div className="relative">
-              <div 
+              <button 
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                className="w-8 h-8 rounded-full bg-[#0A4AEF] flex items-center justify-center text-white cursor-pointer hover:bg-blue-700 transition-colors"
+                className="w-8 h-8 rounded-full bg-[#0A4AEF] flex items-center justify-center text-white cursor-pointer hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0A4AEF]"
                 title="Profile"
+                aria-label="User Profile Menu"
+                aria-haspopup="true"
+                aria-expanded={showProfileDropdown}
               >
-                  <UserIcon className="w-5 h-5" />
-              </div>
+                  <UserIcon className="w-5 h-5" aria-hidden="true" />
+              </button>
 
               {showProfileDropdown && (
                 <>
@@ -235,12 +240,14 @@ function App() {
           {/* SEARCH BAR */}
           <div className="mt-4 mb-14">
             <div className="relative max-w-2xl mx-auto flex items-center">
-              <Search className="w-5 h-5 text-slate-400 absolute left-4" />
+              <Search className="w-5 h-5 text-slate-400 absolute left-4" aria-hidden="true" />
               <input 
+                id="search-logins"
                 type="text" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search your logins..." 
+                aria-label="Search your logins"
                 className="w-full bg-white rounded-full border border-slate-200 py-3.5 pl-12 pr-12 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0A4AEF]/20 focus:border-[#0A4AEF] transition-all"
               />
             </div>
@@ -254,29 +261,31 @@ function App() {
             </div>
             <button
               onClick={openCreateModal}
-              className="bg-[#0A4AEF] hover:bg-blue-700 text-white px-5 py-2.5 rounded-full font-medium flex items-center gap-2 shadow-sm transition-colors text-sm cursor-pointer">
-              <Plus className="w-4 h-4" />
+              aria-label="Add New Vault Item"
+              className="bg-[#0A4AEF] hover:bg-blue-700 text-white px-5 py-2.5 rounded-full font-medium flex items-center gap-2 shadow-sm transition-colors text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0A4AEF]">
+              <Plus className="w-4 h-4" aria-hidden="true" />
               Add New Item
             </button>
           </div>
 
           {/* LOADER & ERROR */}
-          {loading && <div className="text-slate-500 py-10 font-medium">Loading your secure vault...</div>}
-          {error && <div className="text-red-500 py-10 font-medium">Oops, an error occurred: {error}</div>}
+          {loading && <div role="status" aria-live="polite" className="text-slate-500 py-10 font-medium">Loading your secure vault...<span className="sr-only">Loading</span></div>}
+          {error && <div role="alert" aria-live="assertive" className="text-red-500 py-10 font-medium">Oops, an error occurred: {error}</div>}
 
           {/* VAULT GRID */}
           {!loading && vaultItems && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               
               {/* ADD NEW CARD placeholder */}
-              <div
+              <button
                 onClick={openCreateModal}
-                className="h-[240px] border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-slate-500 hover:bg-slate-100/50 cursor-pointer transition-colors">
+                aria-label="Add New Item Card"
+                className="h-[240px] border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center text-slate-500 hover:bg-slate-100/50 cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A4AEF]">
                 <div className="w-12 h-12 bg-[#F4F7FB] rounded-full flex items-center justify-center mb-3">
-                  <Plus className="w-5 h-5 text-slate-500" />
+                  <Plus className="w-5 h-5 text-slate-500" aria-hidden="true" />
                 </div>
                 <span className="font-medium text-sm">Add New Item</span>
-              </div>
+              </button>
 
               {/* MAPPED ITEMS */}
               {filteredItems.length === 0 && searchQuery !== '' && (
@@ -303,26 +312,28 @@ function App() {
                   <div className="flex justify-between items-center mt-4">
                     <button 
                       onClick={() => handleCopyPassword(item.e_password)}
-                      className="bg-blue-50 text-[#0A4AEF] px-4 py-1.5 rounded-md text-xs font-bold tracking-wide flex items-center gap-1.5 hover:bg-blue-100 transition-colors cursor-pointer"
+                      aria-label={`Copy password for ${item.e_title}`}
+                      className="bg-blue-50 text-[#0A4AEF] px-4 py-1.5 rounded-md text-xs font-bold tracking-wide flex items-center gap-1.5 hover:bg-blue-100 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0A4AEF]"
                     >
-                      <Copy className="w-3.5 h-3.5" />
+                      <Copy className="w-3.5 h-3.5" aria-hidden="true" />
                       Copy
                     </button>
                     <div className="flex items-center gap-1 -mr-2">
                       <button 
                         onClick={() => openEditModal(item)}
-                        className="text-slate-300 hover:text-[#0A4AEF] transition-colors cursor-pointer p-2"
+                        className="text-slate-300 hover:text-[#0A4AEF] transition-colors cursor-pointer p-2 focus:outline-none focus:ring-2 focus:ring-[#0A4AEF] rounded"
                         title="Edit Item"
+                        aria-label={`Edit ${item.e_title}`}
                       >
-                        <Pencil className="w-4 h-4" />
+                        <Pencil className="w-4 h-4" aria-hidden="true" />
                       </button>
                       <button 
                         onClick={() => handleDelete(item.vaultitem_id)}
-                        className="text-slate-300 hover:text-red-500 transition-colors cursor-pointer p-2"
+                        className="text-slate-300 hover:text-red-500 transition-colors cursor-pointer p-2 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
                         title="Delete Item"
-                        aria-label="Delete Item"
+                        aria-label={`Delete ${item.e_title}`}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
                       </button>
                     </div>
                   </div>
