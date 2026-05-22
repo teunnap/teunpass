@@ -269,7 +269,7 @@ function App() {
           </div>
 
           {/* LOADER & ERROR */}
-          {loading && <div role="status" aria-live="polite" className="text-slate-500 py-10 font-medium">Loading your secure vault...<span className="sr-only">Loading</span></div>}
+          {loading && <div role="status" aria-live="polite" className="text-slate-500 py-10 font-medium">Loading your secure vault...</div>}
           {error && <div role="alert" aria-live="assertive" className="text-red-500 py-10 font-medium">Oops, an error occurred: {error}</div>}
 
           {/* VAULT GRID */}
