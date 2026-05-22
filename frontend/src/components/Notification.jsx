@@ -26,10 +26,12 @@ const Notification = ({ notification }) => {
   const { message, type = 'success', isLeaving } = notification;
   const { colorClasses, Icon } = TYPE_CONFIG[type] || TYPE_CONFIG.default;
   const animationClass = isLeaving ? 'animate-slide-out' : 'animate-slide-in';
+  const role = (type === 'error' || type === 'warning') ? 'alert' : 'status';
+  const ariaLive = (type === 'error' || type === 'warning') ? 'assertive' : 'polite';
 
   return (
-    <div className={`fixed top-6 left-1/2 -translate-x-1/2 border px-6 py-3 rounded-full shadow-lg z-50 transition-all font-medium text-sm flex items-center gap-2 ${animationClass} ${colorClasses}`}>
-      <Icon className="w-4 h-4" />
+    <div role={role} aria-live={ariaLive} className={`fixed top-6 left-1/2 -translate-x-1/2 border px-6 py-3 rounded-full shadow-lg z-50 transition-all font-medium text-sm flex items-center gap-2 ${animationClass} ${colorClasses}`}>
+      <Icon className="w-4 h-4" aria-hidden="true" />
       {message}
     </div>
   );
