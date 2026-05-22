@@ -46,22 +46,66 @@ Doordat de middleware op elke respons werkt, hoeven individuele routes hier geen
 
 ---
 
-## Lokaal draaien
+## Setup & Lokaal draaien
 
-**Backend:**
+Volg de onderstaande stappen om het project op een nieuw systeem op te zetten.
+
+### 1. Environment Variables instellen
+
+Maak in de hoofdmap van het project een `.env`-bestand aan (je kunt [./.env.example](file:///c:/Users/Gebruiker/clones/teunpass/.env.example) als uitgangspunt gebruiken):
+
 ```bash
+copy .env.example .env
+```
+
+Pas de waarden in het `.env`-bestand aan:
+*   **DATABASE_URL**: De connection string naar de PostgreSQL-database. Bijvoorbeeld: `postgresql://gebruiker:wachtwoord@localhost:5432/teunpass`
+*   **SECRET_KEY**: Een willekeurige geheime sleutel voor het ondertekenen van JWT-tokens. Je kunt deze genereren via:
+    ```bash
+    python -c "import secrets; print(secrets.token_hex(32))"
+    ```
+
+*(Optioneel)* Als de frontend met een andere API-URL moet communiceren dan `http://localhost:8000`, maak dan in de map `frontend/` een `.env`-bestand aan op basis van `frontend/.env.example` en vul daar de `VITE_API_URL` in.
+
+### 2. Database en migraties opzetten
+
+Het project gebruikt Alembic voor het beheren van de database-schema's. Voordat je de applicatie start, moet je de database-tabellen aanmaken met:
+
+```bash
+# Installeer de backend dependencies
 python -m pip install -r requirements.txt
+
+# Voer de migraties uit om de tabellen aan te maken
+alembic upgrade head
+```
+
+### 3. Backend starten
+
+Start de FastAPI-backend met Uvicorn:
+
+```bash
 python -m uvicorn backend.src.main:app --reload
 ```
 
-**Frontend:**
+De backend draait nu standaard op `http://localhost:8000`. Bij het opstarten wordt er automatisch een testgebruiker aangemaakt (`test@example.com`).
+
+### 4. Frontend starten
+
+Open een nieuwe terminal, ga naar de frontend-map en start de ontwikkelserver:
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-**Tests:**
+De frontend start standaard op `http://localhost:5173`. Open deze URL in je browser om Teunpass te gebruiken.
+
+### 5. Tests draaien
+
+Om de testsuite uit te voeren:
+
 ```bash
 pytest tests/
 ```
+
