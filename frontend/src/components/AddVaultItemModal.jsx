@@ -31,12 +31,12 @@ const fieldClass = (base, error, touched, isWarning = false) => {
 
 const BASE_INPUT = "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0A4AEF]/20 focus:border-[#0A4AEF] transition-all";
 
-const Field = ({ label, error, touched, warning, children }) => (
+const Field = ({ id, label, error, touched, warning, children }) => (
   <div className="flex flex-col gap-1.5">
-    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</label>
+    <label htmlFor={id} className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</label>
     {children}
-    {touched && error && !warning && <p className="text-xs text-red-500">{error}</p>}
-    {touched && error &&  warning  && <p className="text-xs text-yellow-600">{error}</p>}
+    {touched && error && !warning && <p role="alert" className="text-xs text-red-500">{error}</p>}
+    {touched && error &&  warning  && <p role="status" className="text-xs text-yellow-600">{error}</p>}
   </div>
 );
 
@@ -86,6 +86,10 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      aria-describedby="modal-desc"
       className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 flex items-center justify-center"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
@@ -95,14 +99,15 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
         <div className="px-8 pt-8 pb-6 border-b border-slate-100">
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer p-1 rounded-lg hover:bg-slate-100"
+            aria-label="Close Dialog"
+            className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer p-1 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-300"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
-          <h2 className="text-2xl font-bold text-slate-900 mb-1">
+          <h2 id="modal-title" className="text-2xl font-bold text-slate-900 mb-1">
             {initialData ? 'Edit Item' : 'Create New Item'}
           </h2>
-          <p className="text-slate-500 text-sm">
+          <p id="modal-desc" className="text-slate-500 text-sm">
             {initialData ? 'Update your secure credential data below.' : 'Store a new credential securely within your encrypted vault.'}
           </p>
         </div>
@@ -112,8 +117,9 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
 
           {/* Name + URL */}
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Name" error={errors.e_title} touched={touched.e_title}>
+            <Field id="input-title" label="Name" error={errors.e_title} touched={touched.e_title}>
               <input
+                id="input-title"
                 className={fieldClass(BASE_INPUT, errors.e_title, touched.e_title)}
                 placeholder="e.g. Personal Gmail"
                 value={form.e_title}
@@ -121,8 +127,9 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
                 onBlur={touch('e_title')}
               />
             </Field>
-            <Field label="URL" error={errors.e_url} touched={touched.e_url}>
+            <Field id="input-url" label="URL" error={errors.e_url} touched={touched.e_url}>
               <input
+                id="input-url"
                 className={fieldClass(BASE_INPUT, errors.e_url, touched.e_url)}
                 placeholder="https://example.com"
                 value={form.e_url}
@@ -134,8 +141,9 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
 
           {/* Username — no validation needed */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Username / Email</label>
+            <label htmlFor="input-username" className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Username / Email</label>
             <input
+              id="input-username"
               className={BASE_INPUT}
               placeholder="user@email.com"
               value={form.e_username}
@@ -144,10 +152,11 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
           </div>
 
           {/* Password */}
-          <Field label="Password" error={errors.e_password} touched={touched.e_password} warning>
+          <Field id="input-password" label="Password" error={errors.e_password} touched={touched.e_password} warning>
             <div className="flex gap-3">
               <div className="relative flex-1">
                 <input
+                  id="input-password"
                   type={showPassword ? 'text' : 'password'}
                   className={`${fieldClass(BASE_INPUT, errors.e_password, touched.e_password, true)} pr-10`}
                   placeholder="Enter password"
@@ -157,10 +166,11 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
                 />
                 <button
                   type="button"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                   onClick={() => setShowPassword(p => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-300 rounded"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                 </button>
               </div>
               <button
@@ -168,28 +178,30 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
                 disabled
                 className="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 text-sm font-medium cursor-not-allowed"
                 title="Coming soon"
+                aria-label="Generate Strong Password (Coming soon)"
               >
-                <Zap className="w-4 h-4" />
+                <Zap className="w-4 h-4" aria-hidden="true" />
                 Generate Strong Password
               </button>
             </div>
           </Field>
 
-          {apiError && <p className="text-red-500 text-sm">{apiError}</p>}
+          {apiError && <p role="alert" className="text-red-500 text-sm">{apiError}</p>}
         </div>
 
         {/* Footer */}
         <div className="px-8 py-5 border-t border-slate-100 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors cursor-pointer"
+            className="px-5 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-300"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-6 py-2.5 rounded-xl bg-[#0A4AEF] hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium text-sm transition-colors cursor-pointer shadow-sm"
+            aria-busy={saving}
+            className="px-6 py-2.5 rounded-xl bg-[#0A4AEF] hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium text-sm transition-colors cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0A4AEF]"
           >
             {saving ? 'Saving…' : 'Save Changes'}
           </button>
