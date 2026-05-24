@@ -52,7 +52,7 @@ Volg de onderstaande stappen om het project op een nieuw systeem op te zetten.
 
 ### 1. Environment Variables instellen
 
-Maak in de hoofdmap van het project een `.env`-bestand aan (je kunt [./.env.example](file:///c:/Users/Gebruiker/clones/teunpass/.env.example) als uitgangspunt gebruiken):
+Maak in de hoofdmap van het project een `.env`-bestand aan (je kunt .env.example als uitgangspunt gebruiken):
 
 ```bash
 copy .env.example .env
