@@ -9,7 +9,8 @@ import {
   Copy, 
   Trash2, 
   Pencil,
-  LogOut
+  LogOut,
+  Star
 } from 'lucide-react';
 import Notification from './components/Notification';
 import { useNotification } from './hooks/useNotification';
@@ -28,6 +29,7 @@ function App() {
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
 
   const openCreateModal = () => {
     setEditingItem(null);
@@ -84,6 +86,18 @@ function App() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchVaultItems();
+      const fetchUser = async () => {
+        try {
+          const response = await apiFetch('/auth/me');
+          if (response.ok) {
+            const data = await response.json();
+            setIsPremium(data.role === 'premium');
+          }
+        } catch (err) {
+          console.error('Failed to fetch user:', err);
+        }
+      };
+      fetchUser();
     }
   }, [isAuthenticated]);
 
@@ -200,6 +214,31 @@ function App() {
         
         {/* TOP HEADER */}
         <header className="h-16 flex items-center justify-end px-8 gap-5" role="banner">
+            <button 
+              aria-label="Upgrade to Premium" 
+              onClick={async () => {
+                if (!isPremium) {
+                  try {
+                    const res = await apiFetch('/auth/me/upgrade', { method: 'PUT' });
+                    if (res.ok) {
+                      setIsPremium(true);
+                      showNotification('You have been upgraded to premium!', 'success');
+                    } else {
+                      showNotification('Failed to upgrade to premium', 'error');
+                    }
+                  } catch (err) {
+                    showNotification('An error occurred during upgrade', 'error');
+                    console.error(err);
+                  }
+                } else {
+                  showNotification('You are already premium!', 'success');
+                }
+              }}
+              className={`${isPremium ? 'text-yellow-400 hover:text-yellow-500' : 'text-slate-400 hover:text-yellow-400'} cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0A4AEF] rounded transition-colors`}
+              title={isPremium ? "Premium Active" : "Upgrade to Premium"}
+            >
+              <Star className={`w-5 h-5 ${isPremium ? 'fill-current' : ''}`} aria-hidden="true" />
+            </button>
             <button aria-label="Refresh Vault Items" onClick={fetchVaultItems} className="text-slate-400 hover:text-slate-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0A4AEF] rounded">
               <RefreshCw className="w-5 h-5" aria-hidden="true" />
             </button>
