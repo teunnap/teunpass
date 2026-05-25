@@ -61,6 +61,7 @@ export default function PasswordGenerator() {
                 onClick={handleCopy}
                 className="p-2.5 bg-blue-50 text-[#0A4AEF] rounded-lg hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A4AEF] cursor-pointer"
                 title="Copy to clipboard"
+                aria-label={copied ? 'Copied to clipboard' : 'Copy to clipboard'}
               >
                 {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
               </button>
