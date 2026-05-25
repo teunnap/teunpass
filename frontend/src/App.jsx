@@ -10,12 +10,14 @@ import {
   Trash2, 
   Pencil,
   LogOut,
-  Star
+  Star,
+  Zap
 } from 'lucide-react';
 import Notification from './components/Notification';
 import { useNotification } from './hooks/useNotification';
 import AddVaultItemModal from './components/AddVaultItemModal';
 import Login from './components/Login';
+import PasswordGenerator from './components/PasswordGenerator';
 import { apiFetch } from './lib/api';
 
 function App() {
@@ -30,6 +32,7 @@ function App() {
   const [editingItem, setEditingItem] = useState(null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
+  const [currentView, setCurrentView] = useState('vault');
 
   const openCreateModal = () => {
     setEditingItem(null);
@@ -201,10 +204,20 @@ function App() {
           </p>
         </div>
 
-        <nav className="px-4">
-          <div className="flex items-center gap-3 bg-blue-50 text-[#0A4AEF] px-4 py-2.5 rounded-lg font-medium cursor-pointer">
+        <nav className="px-4 flex flex-col gap-1">
+          <div 
+            onClick={() => setCurrentView('vault')}
+            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium cursor-pointer transition-colors ${currentView === 'vault' ? 'bg-blue-50 text-[#0A4AEF]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}
+          >
             <Lock className="w-4 h-4" />
             <span className="text-sm">All Items</span>
+          </div>
+          <div 
+            onClick={() => setCurrentView('generator')}
+            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium cursor-pointer transition-colors ${currentView === 'generator' ? 'bg-blue-50 text-[#0A4AEF]' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}
+          >
+            <Zap className="w-4 h-4" />
+            <span className="text-sm">Password Generator</span>
           </div>
         </nav>
       </aside>
@@ -274,7 +287,8 @@ function App() {
             </div>
         </header>
 
-        <div className="max-w-6xl w-full mx-auto px-8 pb-12">
+        {currentView === 'vault' ? (
+          <div className="max-w-6xl w-full mx-auto px-8 pb-12">
           
           {/* SEARCH BAR */}
           <div className="mt-4 mb-14">
@@ -382,6 +396,9 @@ function App() {
             </div>
           )}
         </div>
+        ) : (
+          <PasswordGenerator />
+        )}
       </main>
       {showModal && (
         <AddVaultItemModal
