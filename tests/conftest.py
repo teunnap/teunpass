@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from backend.src.config.database import Base, get_db, DATABASE_URL
 from backend.src.config.settings import settings
 from backend.src.models.user import User, UserRole
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker
 
 TEST_DATABASE_URL = DATABASE_URL + "_test"
@@ -38,6 +38,12 @@ def db_session(test_engine):
     
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=connection)
     session = TestingSessionLocal()
+    session.begin_nested()
+
+    @event.listens_for(session, "after_transaction_end")
+    def restart_savepoint(sess, trans):
+        if trans.nested and trans._parent and not trans._parent.nested:
+            sess.begin_nested()
     
     # Add a default user for all tests
     new_user = User(
@@ -48,7 +54,7 @@ def db_session(test_engine):
         role=UserRole.premium
     )
     session.add(new_user)
-    session.commit()
+    session.flush()
     
     yield session
     
