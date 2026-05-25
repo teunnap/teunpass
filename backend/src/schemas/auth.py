@@ -1,5 +1,7 @@
 from typing import Annotated
-from pydantic import BaseModel, EmailStr, StringConstraints
+from pydantic import BaseModel, ConfigDict, EmailStr, StringConstraints
+import uuid
+from backend.src.models.user import UserRole
 
 Hex64Str = Annotated[
     str,
@@ -24,3 +26,10 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
+
+class UserResponse(BaseModel):
+    id: uuid.UUID
+    email: EmailStr
+    role: UserRole
+    model_config = ConfigDict(from_attributes=True)
+
