@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Eye, EyeOff, Zap } from 'lucide-react';
 import { apiFetch } from '../lib/api';
+import { generatePassword } from '../lib/password';
 
 const EMPTY_FORM    = { e_title: '', e_url: '', e_username: '', e_password: '' };
 const EMPTY_TOUCHED = { e_title: false, e_url: false, e_password: false };
@@ -175,13 +176,17 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
               </div>
               <button
                 type="button"
-                disabled
-                className="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 text-sm font-medium cursor-not-allowed"
-                title="Coming soon"
-                aria-label="Generate Strong Password (Coming soon)"
+                onClick={() => {
+                  const pwd = generatePassword(16, { uppercase: true, lowercase: true, numbers: true, symbols: true });
+                  setForm(prev => ({ ...prev, e_password: pwd }));
+                  setShowPassword(true);
+                }}
+                className="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#0A4AEF] text-sm font-medium hover:bg-blue-50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A4AEF] cursor-pointer"
+                title="Generate Strong Password"
+                aria-label="Generate Strong Password"
               >
                 <Zap className="w-4 h-4" aria-hidden="true" />
-                Generate Strong Password
+                Generate
               </button>
             </div>
           </Field>
