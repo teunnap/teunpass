@@ -28,6 +28,15 @@ def test_login_invalid_password(client, db_session):
     assert response.status_code == 401
     assert response.json() == {"detail": "Invalid credentials"}
 
+def test_get_me(auth_client, db_session):
+    response = auth_client.get("/auth/me")
+    assert response.status_code == 200
+    data = response.json()
+    assert "id" in data
+    assert "email" in data
+    assert "role" in data
+    assert data["email"] == "test@example.com"
+
 def test_login_rate_limiting(client):
     # 5 attempts should trigger rate limit based on default slowapi config or standard usage
     # Since we test rate limits, we should do a loop
