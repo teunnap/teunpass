@@ -1,5 +1,6 @@
 import pytest
 import uuid
+from backend.src.models.user import User, UserRole
 
 def test_login_success(client, db_session):
     # db_session already has user "test@example.com" with hash "0" * 64
@@ -50,3 +51,22 @@ def test_login_rate_limiting(client):
     assert response.status_code in [401, 429]
     if response.status_code == 429:
         assert "Rate limit exceeded" in response.json().get("error", "") or "Too Many Requests" in response.text
+
+
+def test_upgrade_me(auth_client, db_session):
+    user = db_session.get(User, uuid.UUID(int=1))
+    user.role = UserRole.default
+    db_session.commit()
+    db_session.refresh(user)
+    assert user.role == UserRole.default
+
+    response = auth_client.put("/auth/me/upgrade")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == str(user.id)
+    assert data["email"] == user.email
+    assert data["role"] == UserRole.premium.value
+
+    db_session.refresh(user)
+    assert user.role == UserRole.premium
