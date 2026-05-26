@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Eye, EyeOff, Zap } from 'lucide-react';
+import { X, Eye, EyeOff, Zap, Plus, Trash2 } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import { generatePassword } from '../lib/password';
 
@@ -41,7 +41,7 @@ const Field = ({ id, label, error, touched, warning, children }) => (
   </div>
 );
 
-export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
+export default function AddVaultItemModal({ onClose, onSaved, initialData, isPremium }) {
   const [form, setForm]       = useState(initialData ? {
     e_title: initialData.e_title || '',
     e_url: initialData.e_url || '',
@@ -52,6 +52,7 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
   const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving]   = useState(false);
   const [apiError, setApiError] = useState(null);
+  const [customFields, setCustomFields] = useState(initialData?.custom_fields ?? []);
 
   const errors = validate(form);
 
@@ -74,7 +75,7 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
       
       const response = await apiFetch(endpoint, {
         method: method,
-        body: JSON.stringify({ ...form, custom_fields: initialData?.custom_fields ?? [] }),
+        body: JSON.stringify({ ...form, custom_fields: customFields }),
       });
       if (!response.ok) throw new Error('Failed to save item.');
       onSaved(await response.json());
@@ -190,6 +191,72 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData }) {
               </button>
             </div>
           </Field>
+
+          {/* Custom Fields - Only visible for Premium users */}
+          {isPremium && (
+            <div className="flex flex-col gap-3 border-t border-slate-100 pt-5 mt-2">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Custom Fields</label>
+                <button
+                  type="button"
+                  onClick={() => setCustomFields([...customFields, { e_key: '', e_value: '' }])}
+                  className="flex items-center gap-1.5 text-xs font-medium text-[#0A4AEF] hover:text-blue-700 focus:outline-none transition-colors cursor-pointer"
+                  aria-label="Add Custom Field"
+                >
+                  <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+                  Add Field
+                </button>
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                {customFields.length === 0 ? (
+                  <p className="text-sm text-slate-400 italic">No custom fields added.</p>
+                ) : (
+                  customFields.map((field, index) => (
+                    <div key={index} className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                      <div className="flex-1 grid grid-cols-2 gap-3">
+                        <input
+                          type="text"
+                          placeholder="Name (e.g. PIN)"
+                          value={field.e_key}
+                          onChange={(e) => {
+                            const updated = [...customFields];
+                            updated[index].e_key = e.target.value;
+                            setCustomFields(updated);
+                          }}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0A4AEF]/20 focus:border-[#0A4AEF] transition-all"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Value"
+                          value={field.e_value || ''}
+                          onChange={(e) => {
+                            const updated = [...customFields];
+                            updated[index].e_value = e.target.value;
+                            setCustomFields(updated);
+                          }}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0A4AEF]/20 focus:border-[#0A4AEF] transition-all"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = [...customFields];
+                          updated.splice(index, 1);
+                          setCustomFields(updated);
+                        }}
+                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-200"
+                        title="Remove custom field"
+                        aria-label="Remove custom field"
+                      >
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
 
           {apiError && <p role="alert" className="text-red-500 text-sm">{apiError}</p>}
         </div>
