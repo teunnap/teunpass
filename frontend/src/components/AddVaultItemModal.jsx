@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Eye, EyeOff, Zap, Plus, Trash2 } from 'lucide-react';
 import { apiFetch } from '../lib/api';
 import { generatePassword } from '../lib/password';
+import PasswordStrengthMeter from './PasswordStrengthMeter';
 
 const EMPTY_FORM    = { e_title: '', e_url: '', e_username: '', e_password: '' };
 const EMPTY_TOUCHED = { e_title: false, e_url: false, e_password: false };
@@ -193,6 +194,7 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData, isPre
                 Generate
               </button>
             </div>
+            <PasswordStrengthMeter password={form.e_password} />
           </Field>
 
           {/* Custom Fields - Only visible for Premium users */}

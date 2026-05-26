@@ -4,6 +4,7 @@ import { useNotification } from '../hooks/useNotification';
 import { deriveMasterKey, generateAuthenticationHash } from '../lib/crypto';
 import Notification from './Notification';
 import { apiFetch } from '../lib/api';
+import PasswordStrengthMeter from './PasswordStrengthMeter';
 
 const validatePassword = (password) => {
   if (password.length < 12) return 'Master password must be at least 12 characters long';
@@ -171,6 +172,7 @@ function Login({ onLoginSuccess }) {
                     aria-required="true"
                   />
                 </div>
+                {!isLogin && <PasswordStrengthMeter password={password} />}
               </div>
 
               {!isLogin && (
