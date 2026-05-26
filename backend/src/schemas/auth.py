@@ -33,3 +33,5 @@ class UserResponse(BaseModel):
     role: UserRole
     model_config = ConfigDict(from_attributes=True)
 
+class SetRoleRequest(BaseModel):
+    role: UserRole

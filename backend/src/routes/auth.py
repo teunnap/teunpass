@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from backend.src.config.limiter import limiter
 from sqlalchemy.orm import Session
 from backend.src.config.database import get_db
-from backend.src.schemas.auth import RegisterRequest, LoginSaltRequest, LoginSaltResponse, LoginRequest, TokenResponse, UserResponse
+from backend.src.schemas.auth import RegisterRequest, LoginSaltRequest, LoginSaltResponse, LoginRequest, TokenResponse, UserResponse, SetRoleRequest
 from backend.src.services.auth import AuthService
 from backend.src.middleware.auth import get_current_user
 from backend.src.models.user import User, UserRole
@@ -36,10 +36,10 @@ def login(request: Request, data: LoginRequest, db: Session = Depends(get_db)):
 def get_me(request: Request, current_user: User = Depends(get_current_user)):
     return current_user
 
-@router.put("/me/upgrade", response_model=UserResponse)
+@router.put("/me/setrole", response_model=UserResponse)
 @limiter.limit("10/minute")
-def upgrade_me(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    current_user.role = UserRole.premium
+def set_role(request: Request, data: SetRoleRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    current_user.role = data.role
     db.commit()
     db.refresh(current_user)
     return current_user

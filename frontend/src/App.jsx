@@ -239,11 +239,14 @@ function App() {
         {/* TOP HEADER */}
         <header className="h-16 flex items-center justify-end px-8 gap-5" role="banner">
             <button 
-              aria-label="Upgrade to Premium" 
+              aria-label={isPremium ? "Downgrade to Standard" : "Upgrade to Premium"} 
               onClick={async () => {
                 if (!isPremium) {
                   try {
-                    const res = await apiFetch('/auth/me/upgrade', { method: 'PUT' });
+                    const res = await apiFetch('/auth/me/setrole', { 
+                      method: 'PUT',
+                      body: JSON.stringify({ role: 'premium' })
+                    });
                     if (res.ok) {
                       setIsPremium(true);
                       showNotification('You have been upgraded to premium!', 'success');
@@ -255,11 +258,26 @@ function App() {
                     console.error(err);
                   }
                 } else {
-                  showNotification('You are already premium!', 'success');
+                  try {
+                    const res = await apiFetch('/auth/me/setrole', { 
+                      method: 'PUT',
+                      body: JSON.stringify({ role: 'default' })
+                    });
+                    if (res.ok) {
+                      setIsPremium(false);
+                      showNotification('You have been downgraded to standard.', 'success');
+                    } else {
+                      const errData = await res.json().catch(() => ({}));
+                      showNotification(errData.detail || 'Failed to downgrade', 'error');
+                    }
+                  } catch (err) {
+                    showNotification('An error occurred during downgrade', 'error');
+                    console.error(err);
+                  }
                 }
               }}
               className={`${isPremium ? 'text-yellow-400 hover:text-yellow-500' : 'text-slate-400 hover:text-yellow-400'} cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#0A4AEF] rounded transition-colors`}
-              title={isPremium ? "Premium Active" : "Upgrade to Premium"}
+              title={isPremium ? "Downgrade to Standard" : "Upgrade to Premium"}
             >
               <Star className={`w-5 h-5 ${isPremium ? 'fill-current' : ''}`} aria-hidden="true" />
             </button>
