@@ -54,7 +54,8 @@ function Login({ onLoginSuccess }) {
         });
         
         if (!saltRes.ok) {
-          throw new Error('Invalid credentials or user not found');
+          const errData = await saltRes.json().catch(() => ({}));
+          throw new Error(errData.detail || 'Invalid credentials or user not found');
         }
         
         const { auth_salt } = await saltRes.json();
@@ -70,7 +71,8 @@ function Login({ onLoginSuccess }) {
         });
         
         if (!loginRes.ok) {
-          throw new Error('Invalid credentials');
+          const errData = await loginRes.json().catch(() => ({}));
+          throw new Error(errData.detail || 'Invalid credentials');
         }
         
         const data = await loginRes.json();

@@ -77,7 +77,10 @@ export default function AddVaultItemModal({ onClose, onSaved, initialData, isPre
         method: method,
         body: JSON.stringify({ ...form, custom_fields: customFields }),
       });
-      if (!response.ok) throw new Error('Failed to save item.');
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || 'Failed to save item.');
+      }
       onSaved(await response.json());
     } catch (err) {
       setApiError(err.message);

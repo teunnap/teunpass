@@ -67,7 +67,8 @@ function App() {
             sessionStorage.removeItem('token');
             throw new Error('Authentication required');
         }
-        throw new Error('Failed to fetch from API');
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || 'Failed to fetch from API');
       }
       const data = await response.json();
       setVaultItems(data);
@@ -122,7 +123,8 @@ function App() {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to delete item');
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || 'Failed to delete item');
       }
 
       setVaultItems((prev) => prev.filter(item => item.vaultitem_id !== itemId));
@@ -251,7 +253,8 @@ function App() {
                       setIsPremium(true);
                       showNotification('You have been upgraded to premium!', 'success');
                     } else {
-                      showNotification('Failed to upgrade to premium', 'error');
+                      const errData = await res.json().catch(() => ({}));
+                      showNotification(errData.detail || 'Failed to upgrade to premium', 'error');
                     }
                   } catch (err) {
                     showNotification('An error occurred during upgrade', 'error');
