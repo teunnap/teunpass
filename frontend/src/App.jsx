@@ -92,15 +92,26 @@ function App() {
       const fetchUser = async () => {
         try {
           const response = await apiFetch('/auth/me');
-          if (response.ok) {
-            const data = await response.json();
-            setIsPremium(data.role === 'premium');
+          if (!response.ok) {
+            setIsPremium(false);
+            if (response.status === 401) {
+              setIsAuthenticated(false);
+              sessionStorage.removeItem('token');
+              throw new Error('Authentication required');
+            }
+            throw new Error('Failed to fetch user');
           }
+
+          const data = await response.json();
+          setIsPremium(data.role === 'premium');
         } catch (err) {
+          setIsPremium(false);
           console.error('Failed to fetch user:', err);
         }
       };
       fetchUser();
+    } else {
+      setIsPremium(false);
     }
   }, [isAuthenticated]);
 
