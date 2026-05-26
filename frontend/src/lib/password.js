@@ -40,7 +40,7 @@ export function calculatePasswordStrength(password) {
   
   // Score mapping (max 6)
   if (score <= 2) return { score, label: 'Weak', color: 'bg-red-500', width: 'w-1/4' };
-  if (score <= 4) return { score, label: 'Fair', color: 'bg-yellow-400', width: 'w-2/4' };
+  if (score <= 4) return { score, label: 'Fair', color: 'bg-yellow-400', width: 'w-1/2' };
   if (score === 5) return { score, label: 'Good', color: 'bg-blue-500', width: 'w-3/4' };
   return { score, label: 'Strong', color: 'bg-green-500', width: 'w-full' };
 }
