@@ -408,6 +408,7 @@ function App() {
           }}
           onSaved={handleItemSaved}
           initialData={editingItem}
+          isPremium={isPremium}
         />
       )}
     </div>
