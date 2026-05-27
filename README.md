@@ -103,9 +103,25 @@ De frontend start standaard op `http://localhost:5173`. Open deze URL in je brow
 
 ### 5. Tests draaien
 
-Om de testsuite uit te voeren:
+De applicatie bevat tests voor zowel de backend als de frontend.
 
+**Backend tests (Pytest):**
+Zorg dat je in de hoofdmap zit en voer uit:
 ```bash
 pytest tests/
+```
+
+**Frontend unit & component tests (Vitest):**
+Ga naar de frontend map en start de test runner:
+```bash
+cd frontend
+npm run test
+```
+
+**Frontend end-to-end tests (Playwright):**
+Voor het uitvoeren van de browser tests:
+```bash
+cd frontend
+npx playwright test
 ```
 
