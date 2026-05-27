@@ -110,6 +110,15 @@ Zorg dat je in de hoofdmap zit en voer uit:
 ```bash
 pytest tests/
 ```
+Om de test coverage (dekking) in te zien in de terminal, gebruik je:
+```bash
+coverage report
+```
+Voor een uitgebreid en klikbaar HTML-rapport, gebruik je:
+```bash
+coverage html
+```
+Dit maakt een `htmlcov/index.html` bestand aan die je in je browser kunt openen.
 
 **Frontend unit & component tests (Vitest):**
 Ga naar de frontend map en start de test runner:
