@@ -108,7 +108,7 @@ De applicatie bevat tests voor zowel de backend als de frontend.
 **Backend tests (Pytest):**
 Zorg dat je in de hoofdmap zit en voer uit:
 ```bash
-pytest tests/
+pytest --cov=backend tests/
 ```
 Om de test coverage (dekking) in te zien in de terminal, gebruik je:
 ```bash
