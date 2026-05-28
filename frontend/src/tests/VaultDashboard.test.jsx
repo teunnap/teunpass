@@ -27,14 +27,21 @@ describe('VaultDashboard (TC-04)', () => {
     // Mock authenticated state
     sessionStorage.setItem('token', 'fake-token');
 
-    // Mock API response with 3 items, one is Netflix
-    api.apiFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        { vaultitem_id: '1', e_title: 'Netflix', e_username: 'user@netflix.com' },
-        { vaultitem_id: '2', e_title: 'Google', e_username: 'user@gmail.com' },
-        { vaultitem_id: '3', e_title: 'Github', e_username: 'dev@github.com' }
-      ]
+    // Mock API responses for vault items and user
+    api.apiFetch.mockImplementation(async (endpoint) => {
+      if (endpoint === '/auth/me') {
+        return { ok: true, json: async () => ({ role: 'default' }) };
+      }
+      if (endpoint === '/vaultitems/') {
+        return {
+          ok: true,
+          json: async () => [
+            { vaultitem_id: '1', e_title: 'Netflix', e_username: 'user@netflix.com' },
+            { vaultitem_id: '2', e_title: 'Google', e_username: 'user@gmail.com' },
+            { vaultitem_id: '3', e_title: 'Github', e_username: 'dev@github.com' }
+          ]
+        };
+      }
     });
 
     const user = userEvent.setup();
@@ -60,11 +67,18 @@ describe('VaultDashboard (TC-04)', () => {
   it('securely handles XSS payload in search without rendering HTML', async () => {
     sessionStorage.setItem('token', 'fake-token');
     
-    api.apiFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        { vaultitem_id: '1', e_title: 'Safe Item', e_username: 'user' }
-      ]
+    api.apiFetch.mockImplementation(async (endpoint) => {
+      if (endpoint === '/auth/me') {
+        return { ok: true, json: async () => ({ role: 'default' }) };
+      }
+      if (endpoint === '/vaultitems/') {
+        return {
+          ok: true,
+          json: async () => [
+            { vaultitem_id: '1', e_title: 'Safe Item', e_username: 'user' }
+          ]
+        };
+      }
     });
 
     const user = userEvent.setup();

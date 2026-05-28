@@ -76,6 +76,9 @@ test.describe('Teunpass E2E', () => {
     // Verify dashboard loaded
     await expect(page.getByRole('heading', { name: 'Vault Overview' })).toBeVisible();
 
+    // Wait for the vault items API to resolve before interacting with the DOM
+    await page.waitForResponse('**/vaultitems/');
+
     // Click Add New Item
     await page.getByRole('button', { name: 'Add New Item' }).first().click();
 
