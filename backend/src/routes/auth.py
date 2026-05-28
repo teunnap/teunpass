@@ -36,10 +36,10 @@ def login(request: Request, data: LoginRequest, db: Session = Depends(get_db)):
 def get_me(request: Request, current_user: User = Depends(get_current_user)):
     return current_user
 
-@router.put("/me/setrole", response_model=UserResponse)
+@router.put("/me/upgrade", response_model=UserResponse)
 @limiter.limit("10/minute")
-def set_role(request: Request, data: SetRoleRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    current_user.role = data.role
+def upgrade_me(request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    current_user.role = UserRole.premium
     db.commit()
     db.refresh(current_user)
     return current_user
